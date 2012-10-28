@@ -167,7 +167,7 @@ if __name__ == '__main__':
         print("USAGE: auto-auto-complete SHELL --output OUTPUT_FILE --source SOURCE_FILE")
         exit(1)
     
-    shell = sys.argv[1]
+    shell = sys.argv[1].upper()
     output = None
     source = None
     
@@ -206,6 +206,30 @@ if __name__ == '__main__':
         source = file.read().decode('utf8', 'replace')
     source = Parser.parse(source)
     Parser.simplify(source)
-
-    print(source)
+    
+    program = source[0]
+    unargumented = []
+    argumented = []
+    variadic = []
+    suggestion = []
+    
+    for item in source[1:]:
+        if item[0] == 'unargumented':
+            unargumented.append(item[1:]);
+        elif item[0] == 'argumented':
+            argumented.append(item[1:]);
+        elif item[0] == 'variadic':
+            variadic.append(item[1:]);
+        elif item[0] == 'suggestion':
+            suggestion.append(item[1:]);
+    
+    for group in (unargumented, argumented, variadic):
+        for index in range(0, len(group)):
+            item = group[index]
+            map = {}
+            for elem in item:
+                map[elem[0]] = elem[1:]
+            group[index] = map
+    
+    print(shell)
 
