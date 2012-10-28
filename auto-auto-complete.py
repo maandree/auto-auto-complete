@@ -174,7 +174,89 @@ class GeneratorBASH:
     @param  suggestion:list<list<↑|str>>             Specification of argument suggestions
     '''
     def __init__(self, program, unargumented, argumented, variadic, suggestion):
-        print("{bash}")
+        self.program      = program
+        self.unargumented = unargumented
+        self.argumented   = argumented
+        self.variadic     = variadic
+        self.suggestion   = suggestion
+    
+    
+    '''
+    Gets the argument suggesters for each option
+    
+    @param  :dist<str, str>  Map from option to suggester
+    '''
+    def __getSuggesters(self):
+        suggesters = {}
+        
+        for group in (self.unargumented, self.argumented, self.variadic):
+            for item in group:
+                if 'suggest' in item:
+                    suggester = item['suggest']
+                    for option in item['options']:
+                        suggesters[option] = suggester[0]
+        
+        for group in (self.unargumented, self.argumented, self.variadic):
+            for item in group:
+                if ('suggest' not in item) and ('bind' in item):
+                    bind = item['bind'][0]
+                    if bind in suggesters:
+                        suggester = suggesters[bind]
+                        for option in item['options']:
+                            suggesters[option] = suggester
+        
+        return suggesters
+    
+    
+    '''
+    Returns the generated code
+    
+    @return  :str  The generated code
+    '''
+    def get(self):
+        buf = '# bash completion for %s         -*- shell-script -*-\n\n' % self.program
+        buf += '_%s()\n{\n' % self.program
+        buf += '    local cur prev words cword\n'
+        buf += '    _init_completion -n = || return\n\n'
+        
+        options = []
+        for group in (self.unargumented, self.argumented, self.variadic):
+            for item in group:
+                if 'complete' in item:
+                    options += item['complete']
+        buf += '    options="%s"\n' % (' '.join(options))
+        buf += '    COMPREPLY=( $( compgen -W "$options" -- "$cur" ) )\n\n'
+        
+        suggesters = self.__getSuggesters();
+        suggestFunctions = {}
+        for function in self.suggestion:
+            suggestFunctions[function[0]] = function[1:]
+        
+        indenticals = {}
+        for option in suggesters:
+            suggester = suggestFunctions[suggesters[option]]
+            _suggester = str(suggester)
+            if _suggester not in indenticals:
+                indenticals[_suggester] = (suggester, [option])
+            else:
+                indenticals[_suggester][1].append(option)
+        
+        index = 0
+        for _suggester in indenticals:
+            (suggester, options) = indenticals[_suggester]
+            conds = []
+            for option in options:
+                conds.append('[ $prev = "%s" ]' % option)
+            buf += '    %s %s; then\n' % ('if' if index == 0 else 'elif', ' || '.join(conds))
+            buf += '        : suggestions=%s\n' % str(suggester)
+            buf += '        : COMPREPLY=( $( compgen -W "$suggestions" -- "$cur" ) )\n'
+            index += 1
+        
+        if index > 0:
+            buf += '    fi\n'
+        
+        buf += '}\n\ncomplete -o default -F _%s %s\n\n' % (self.program, self.program)
+        return buf
 
 
 
@@ -185,7 +267,7 @@ mane!
 @param  output:str  Output file
 @param  source:str  Source file
 '''
-def main(shell, outputm source)
+def main(shell, output, source):
     with open(source, 'rb') as file:
         source = file.read().decode('utf8', 'replace')
     source = Parser.parse(source)
@@ -218,6 +300,10 @@ def main(shell, outputm source)
     generator = 'Generator' + shell.upper()
     generator = globals()[generator]
     generator = generator(program, unargumented, argumented, variadic, suggestion)
+    code = generator.get()
+    
+    with open(output, 'wb') as file:
+        file.write(code.encode('utf-8'))
 
 
 
