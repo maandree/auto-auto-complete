@@ -159,6 +159,25 @@ class Parser:
                     stack.append(item)
 
 
+
+'''
+Completion script generator for GNU Bash
+'''
+class GeneratorBASH:
+    '''
+    Constructor
+    
+    @param  program:str                              The command to generate completion for
+    @param  unargumented:list<dict<str, list<str>>>  Specification of unargumented options
+    @param  argumented:list<dict<str, list<str>>>    Specification of argumented options
+    @param  variadic:list<dict<str, list<str>>>      Specification of variadic options
+    @param  suggestion:list<list<↑|str>>             Specification of argument suggestions
+    '''
+    def __init__(self, program, unargumented, argumented, variadic, suggestion):
+        print("{bash}")
+
+
+
 '''
 mane!
 '''
@@ -231,5 +250,7 @@ if __name__ == '__main__':
                 map[elem[0]] = elem[1:]
             group[index] = map
     
-    print(shell)
+    generator = 'Generator' + shell
+    generator = globals()[generator]
+    generator = generator(program, unargumented, argumented, variadic, suggestion)
 
