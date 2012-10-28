@@ -241,6 +241,33 @@ class GeneratorBASH:
             else:
                 indenticals[_suggester][1].append(option)
         
+        def verb(text):
+            temp = text
+            for char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+=/@:\'':
+                temp = temp.replace(char, '')
+            if len(temp) == 0:
+                return text
+            return '\'' + text.replace('\'', '\'\\\'\'') + '\''
+        
+        def makeexec(functionType, function):
+            if functionType in ('exec', 'pipe', 'fullpipe', 'cat', 'and', 'or'):
+                elems = [(' %s ' % makeexec(item[0], item[1:]) if isinstance(item, list) else verb(item)) for item in function]
+                if functionType == 'exec':
+                    return ' "$( %s )" ' % (' '.join(elems))
+                if functionType == 'pipe':
+                    return ' ( %s ) ' % (' | '.join(elems))
+                if functionType == 'fullpipe':
+                    return ' ( %s ) ' % (' |% '.join(elems))
+                if functionType == 'cat':
+                    return ' ( %s ) ' % (' ; '.join(elems))
+                if functionType == 'and':
+                    return ' ( %s ) ' % (' && '.join(elems))
+                if functionType == 'or':
+                    return ' ( %s ) ' % (' || '.join(elems))
+            if functionType in ('params', 'verbatim'):
+                return ' '.join([verb(item) for item in function])
+            return ' '.join([verb(functionType)] + [verb(item) for item in function])
+        
         index = 0
         for _suggester in indenticals:
             (suggester, options) = indenticals[_suggester]
@@ -248,8 +275,30 @@ class GeneratorBASH:
             for option in options:
                 conds.append('[ $prev = "%s" ]' % option)
             buf += '    %s %s; then\n' % ('if' if index == 0 else 'elif', ' || '.join(conds))
-            buf += '        : suggestions=%s\n' % str(suggester)
-            buf += '        : COMPREPLY=( $( compgen -W "$suggestions" -- "$cur" ) )\n'
+            suggestion = '';
+            for function in suggester:
+                functionType = function[0]
+                function = function[1:]
+                if functionType == 'verbatim':
+                    suggestion += '" %s"' % (' '.join([verb(item) for item in function]))
+                elif functionType == 'ls':
+                    filter = ''
+                    if len(function) > 1:
+                        filter = ' | grep -v \\/%s\\$ | grep %s\\$' % (function[1], function[1])
+                    suggestion += '" $(ls -1 --color=no %s%s)"' % (function[0], filter)
+                elif functionType in ('exec', 'pipe', 'fullpipe', 'cat', 'and', 'or'):
+                    suggestion += ('" %s"' if functionType == 'exec' else '" $(%s)"') % makeexec(functionType, function)
+                elif functionType == 'calc':
+                    expression = []
+                    for item in function:
+                        if isinstance(item, list):
+                            expression.append(('%s' if item[0] == 'exec' else '$(%s)') % makeexec(item[0], item[1:]))
+                        else:
+                            expression.append(verb(item))
+                    suggestion += '" $(( %s ))"' % (' '.join(expression))
+            if len(suggestion) > 0:
+                buf += '        suggestions=%s\n' % str(suggestion)
+                buf += '        COMPREPLY=( $( compgen -W "$suggestions" -- "$cur" ) )\n'
             index += 1
         
         if index > 0:
