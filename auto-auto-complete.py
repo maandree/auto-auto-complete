@@ -166,5 +166,6 @@ if __name__ == '__main__':
     with open(source, 'rb') as file:
         source = file.read().decode('utf8', 'replace')
     source = Parser.parse(source)
+
     print(source)
 

@@ -1,4 +1,4 @@
-(completion ponysay
+(ponysay
 
 	(multiple unargumented
 		((options -h --help)                                  (complete --help)        (desc 'Show summary of options'))
