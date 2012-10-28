@@ -98,6 +98,9 @@ class Parser:
                 else:
                     stack[stackptr] = []
             elif (c == ')') and (quote is None):
+                if buf is not None:
+                    stack[stackptr].append(buf)
+                    buf = None
                 if stackptr == 0:
                     return stack[0]
                 stackptr -= 1
@@ -117,7 +120,43 @@ class Parser:
                     buf += c
         
         raise Exception('premature end of file')
-
+    
+    
+    '''
+    Simplifies a tree
+    
+    @param  tree:list<↑|str>  The tree
+    '''
+    @staticmethod
+    def simplify(tree):
+        program = tree[0]
+        stack = [tree]
+        while len(stack) > 0:
+            node = stack.pop()
+            new = []
+            edited = False
+            for item in node:
+                if isinstance(item, list):
+                    if item[0] == 'multiple':
+                        master = item[1]
+                        for slave in item[2:]:
+                            new.append([master] + slave)
+                        edited = True
+                    elif item[0] == 'case':
+                        for alt in item[1:]:
+                            if alt[0] == program:
+                                new.append(alt[1])
+                                break
+                        edited = True
+                    else:
+                        new.append(item)
+                else:
+                    new.append(item)
+            if edited:
+                node[:] = new
+            for item in node:
+                if isinstance(item, list):
+                    stack.append(item)
 
 
 '''
@@ -166,6 +205,7 @@ if __name__ == '__main__':
     with open(source, 'rb') as file:
         source = file.read().decode('utf8', 'replace')
     source = Parser.parse(source)
+    Parser.simplify(source)
 
     print(source)
 
