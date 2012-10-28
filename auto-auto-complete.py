@@ -50,8 +50,8 @@ class Parser:
     '''
     Parse a code and return a tree
     
-    @param   code:str            The code to parse
-    @return  :list<list<↑>|str>  The root node in the tree
+    @param   code:str      The code to parse
+    @return  :list<↑|str>  The root node in the tree
     '''
     @staticmethod
     def parse(code):
