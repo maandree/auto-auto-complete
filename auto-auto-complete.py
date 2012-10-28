@@ -42,6 +42,85 @@ def printerr(text = '', end = '\n'):
 
 
 
+
+'''
+Bracket tree parser
+'''
+class Parser:
+    '''
+    Parse a code and return a tree
+    
+    @param   code:str            The code to parse
+    @return  :list<list<↑>|str>  The root node in the tree
+    '''
+    @staticmethod
+    def parse(code):
+        raw = code.replace('\f', '\n').replace('\r\n', '\n').replace('\r', '\n').replace('\t', ' ')
+        stack = []
+        stackptr = -1
+        
+        comment = False
+        escape = False
+        quote = None
+        buf = None
+        
+        for charindex in range(0, len(code)):
+            c = code[charindex]
+            if comment:
+                if c in '\n\r\f':
+                    comment = False
+            elif escape:
+                escape = False
+                if   c == 'a':  buf += '\a'
+                elif c == 'b':  buf += chr(8)
+                elif c == 'e':  buf += '\033'
+                elif c == 'f':  buf += '\f'
+                elif c == 'n':  buf += '\n'
+                elif c == 'r':  buf += '\r'
+                elif c == 't':  buf += '\t'
+                elif c == 'v':  buf += chr(11)
+                elif c == '0':  buf += '\0'
+                else
+                    buf += c
+            elif c == quote:
+                quote = None
+            elif (c == ';') and (quote is None):
+                if buf is not None:
+                    stack[stackptr].append(buf)
+                    buf = None
+                comment = True
+            elif (c == '(') and (quote is None):
+                if buf is not None:
+                    stack[stackptr].append(buf)
+                    buf = None
+                stackptr += 1
+                stack[stackptr] = []
+            elif (c == ')') and (quote is None):
+                if stackptr == 0:
+                    return stack[0]
+                stackptr -= 1
+                stack[stackptr].append(stack[stackptr + 1])
+            elif (c in ' \t\n\r\f') and (quote is None):
+                if buf is not None:
+                    stack[stackptr].append(buf)
+                    buf = None
+            else:
+                if buf is None:
+                    buf = ''
+                if c == '\\':
+                    escape = True
+                elif c in '\'\"':
+                    quote = c
+                else:
+                    buf += c
+        
+        raise Exception('premature end of file')
+
+
+
+'''
+mane!
+'''
 if __name__ = '__main__':
     print('I am so sorry, this is not implement yet.')
 
