@@ -1,0 +1,59 @@
+(completion ponysay
+
+	(multiple unargumented
+		((options -h --help)                                  (complete --help)        (desc 'Show summary of options'))
+		((options -v --version)                               (complete --version)     (desc 'Show version of program'))
+		((options -c --compress)                              (complete --compress)    (desc 'Compress message'))
+		((options -l --list)                                  (complete --list)        (desc 'List all MLP:FiM ponies'))
+		((options -L --altlist --symlist)                     (complete --symlist)     (desc 'List all MLP:FiM ponies, with symlink mapping'))
+		((options +l ++list)                                  (complete ++list)        (desc 'List all non-MLP:FiM ponies'))
+		((options +K ++altlist ++symlist)                     (complete ++symlist)     (desc 'List all non-MLP:FiM ponies, with symlink mapping'))
+		((options -A --all)                                   (complete --all)         (desc 'List all ponies'))
+		((options +A ++all --altall --symall)                 (complete --symall)      (desc 'List all ponies, with symlink mapping'))
+		((options -b --bubblelist --balloonlist)              (complete --balloonlist) (desc 'List all balloon styles'))
+		((options -o --pony-only --ponyonly)                  (complete --pony-only)   (desc 'Print just the pony'))
+		((options -X --256-colours --256colours --x-colours)                           (desc 'Use xterm colours'))
+		((options -V --tty-colours --ttycolours --vt-colours)                          (desc 'Use linux vt colours'))
+		((options -K --kms-colours --kmscolours)                                       (desc 'Utilise kms support'))
+	)
+	
+	(multiple argumented
+		((options -f --file --pony)                 (arg PONY)        (complete --file --pony) (suggest pony-f)  (desc 'Specify the pony that should printed'))
+		((options +f ++file ++pony)                 (arg PONY)        (complete ++file ++pony) (suggest pony+f)  (desc 'Specify the extrapony that should printed'))
+		((options -q --quote)                       (arg PONY)        (complete --quote)       (suggest pony-q)  (desc 'Specify the pony that should quote herself'))
+		((options -b --bubble --balloon)            (arg STYLE)       (complete --balloon)     (suggest balloon) (desc 'Specify message balloon style'))
+		((options -W --wrap)                        (arg COLUMN)      (complete --wrap)        (suggest wrap)    (desc 'Specify wrapping column'))
+		((options +c --colour)                      (arg ANSI-COLOUR) (complete --colour)                        (desc 'Specify colour of the balloon, balloon link and message'))
+		((options --colour-bubble --colour-balloon) (arg ANSI-COLOUR)                                            (desc 'Specify colour of the balloon'))
+		((options --colour-link)                    (arg ANSI-COLOUR)                                            (desc 'Specify colour of the balloon link'))
+		((options --colour-msg --colour-message)    (arg ANSI-COLOUR)                                            (desc 'Specify colour of the message'))
+		((options --colour-pony)                    (arg ANSI-COLOUR)                                            (desc 'Specify colour of the pony (if uncoloured)'))
+		((options --colour-wrap --colour-hyphen)    (arg ANSI-COLOUR)                                            (desc 'Specify addition colour of wrapping hyphen'))
+	)
+	
+	; `bind` copies everything that is missing except `options` and `suggest`
+	(variadic (options --f --files --ponies) (bind -f) (desc 'Specify the ponies that may be printed'))
+	(variadic (options ++f ++files ++ponies) (bind +f) (desc 'Specify the extraponies that may be printed'))
+	(variadic (options --q --quotes)         (bind -q) (desc 'Specify the pony that may quote themself'))
+	
+	(suggestion pony-f  (exec "'/usr/bin/ponysay'" --onelist)
+	                    (no-exec ls "'/usr/share/ponysay/ponies'" .pony)
+	)
+	(suggestion pony+f  (exec "'/usr/bin/ponysay'" ++onelist)
+		    	    (no-exec ls "'/usr/share/ponysay/extraponies'" .pony)
+	)
+	(suggestion pony-q  (exec "'/usr/bin/ponysay'" --quoters)
+		    	    (no-exec ls "'/usr/share/ponysay/ponies'" .pony)
+	)
+	(suggestion balloon (exec "'/usr/bin/ponysay'" --balloonlist)
+		    	    (no-exec ls "'/usr/share/ponysay/balloons'") (case (ponysay .say) (ponythink .think))
+	)
+	(suggestion wrap    (verbatim none inhertit 100 60)
+		    	    (calc (pipe (stty size)
+			    	  	(cut -d ' ' -f 2)
+				  ) - 10
+			    )
+	)
+	; in addition to `pipe` to following are also possible `fullpipe` `exec` `cat` `and` `or`
+)
+
