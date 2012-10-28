@@ -18,7 +18,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
+import sys
 
 
 '''
@@ -55,7 +55,6 @@ class Parser:
     '''
     @staticmethod
     def parse(code):
-        raw = code.replace('\f', '\n').replace('\r\n', '\n').replace('\r', '\n').replace('\t', ' ')
         stack = []
         stackptr = -1
         
@@ -80,7 +79,7 @@ class Parser:
                 elif c == 't':  buf += '\t'
                 elif c == 'v':  buf += chr(11)
                 elif c == '0':  buf += '\0'
-                else
+                else:
                     buf += c
             elif c == quote:
                 quote = None
@@ -94,7 +93,10 @@ class Parser:
                     stack[stackptr].append(buf)
                     buf = None
                 stackptr += 1
-                stack[stackptr] = []
+                if stackptr == len(stack):
+                    stack.append([])
+                else:
+                    stack[stackptr] = []
             elif (c == ')') and (quote is None):
                 if stackptr == 0:
                     return stack[0]
@@ -109,7 +111,7 @@ class Parser:
                     buf = ''
                 if c == '\\':
                     escape = True
-                elif c in '\'\"':
+                elif (c in '\'\"') and (quote is None):
                     quote = c
                 else:
                     buf += c
@@ -121,7 +123,48 @@ class Parser:
 '''
 mane!
 '''
-if __name__ = '__main__':
-    print('I am so sorry, this is not implement yet.')
-
+if __name__ == '__main__':
+    if len(sys.argv) != 6:
+        print("USAGE: auto-auto-complete SHELL --output OUTPUT_FILE --source SOURCE_FILE")
+        exit(1)
+    
+    shell = sys.argv[1]
+    output = None
+    source = None
+    
+    option = None
+    aliases = {'-o' : '--output',
+               '-f' : '--source', '--file' : '--source',
+               '-s' : '--source'}
+    
+    def useopt(option, arg):
+        global source
+        global output
+        old = None
+        if   option == '--output': old = output; output = arg
+        elif option == '--source': old = source; source = arg
+        else:
+            raise Exception('Unrecognised option: ' + option)
+        if old is not None:
+            raise Exception('Duplicate option: ' + option)
+    
+    for arg in sys.argv[2:]:
+        if option is not None:
+            if option in aliases:
+                option = aliases[option]
+            useopt(option, arg)
+            option = None
+        else:
+            if '=' in arg:
+                useopt(arg[:index('=')], arg[index('=') + 1:])
+            else:
+                option = arg
+    
+    if output is None: raise Exception('Unused option: --output')
+    if source is None: raise Exception('Unused option: --source')
+    
+    with open(source, 'rb') as file:
+        source = file.read().decode('utf8', 'replace')
+    source = Parser.parse(source)
+    print(source)
 
