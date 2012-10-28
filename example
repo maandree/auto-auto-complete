@@ -46,7 +46,7 @@
 		    	    (no-exec ls "'/usr/share/ponysay/ponies'" .pony)
 	)
 	(suggestion balloon (exec "'/usr/bin/ponysay'" --balloonlist)
-		    	    (no-exec ls "'/usr/share/ponysay/balloons'") (case (ponysay .say) (ponythink .think))
+		    	    (no-exec ls "'/usr/share/ponysay/balloons'" (case (ponysay .say) (ponythink .think)))
 	)
 	(suggestion wrap    (verbatim none inhertit 100 60)
 		    	    (calc (pipe (stty size)
