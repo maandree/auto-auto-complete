@@ -84,7 +84,7 @@ class Parser:
                     buf += c
             elif c == quote:
                 quote = None
-            elif (c == ';') and (quote is None):
+            elif (c in ';#') and (quote is None):
                 if buf is not None:
                     stack[stackptr].append(buf)
                     buf = None
