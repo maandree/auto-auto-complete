@@ -180,13 +180,56 @@ class GeneratorBASH:
 
 '''
 mane!
+
+@param  shell:str   Shell to generato completion for
+@param  output:str  Output file
+@param  source:str  Source file
+'''
+def main(shell, outputm source)
+    with open(source, 'rb') as file:
+        source = file.read().decode('utf8', 'replace')
+    source = Parser.parse(source)
+    Parser.simplify(source)
+    
+    program = source[0]
+    unargumented = []
+    argumented = []
+    variadic = []
+    suggestion = []
+    
+    for item in source[1:]:
+        if item[0] == 'unargumented':
+            unargumented.append(item[1:]);
+        elif item[0] == 'argumented':
+            argumented.append(item[1:]);
+        elif item[0] == 'variadic':
+            variadic.append(item[1:]);
+        elif item[0] == 'suggestion':
+            suggestion.append(item[1:]);
+    
+    for group in (unargumented, argumented, variadic):
+        for index in range(0, len(group)):
+            item = group[index]
+            map = {}
+            for elem in item:
+                map[elem[0]] = elem[1:]
+            group[index] = map
+    
+    generator = 'Generator' + shell.upper()
+    generator = globals()[generator]
+    generator = generator(program, unargumented, argumented, variadic, suggestion)
+
+
+
+'''
+mane!
 '''
 if __name__ == '__main__':
     if len(sys.argv) != 6:
         print("USAGE: auto-auto-complete SHELL --output OUTPUT_FILE --source SOURCE_FILE")
         exit(1)
     
-    shell = sys.argv[1].upper()
+    shell = sys.argv[1]
     output = None
     source = None
     
@@ -221,36 +264,5 @@ if __name__ == '__main__':
     if output is None: raise Exception('Unused option: --output')
     if source is None: raise Exception('Unused option: --source')
     
-    with open(source, 'rb') as file:
-        source = file.read().decode('utf8', 'replace')
-    source = Parser.parse(source)
-    Parser.simplify(source)
-    
-    program = source[0]
-    unargumented = []
-    argumented = []
-    variadic = []
-    suggestion = []
-    
-    for item in source[1:]:
-        if item[0] == 'unargumented':
-            unargumented.append(item[1:]);
-        elif item[0] == 'argumented':
-            argumented.append(item[1:]);
-        elif item[0] == 'variadic':
-            variadic.append(item[1:]);
-        elif item[0] == 'suggestion':
-            suggestion.append(item[1:]);
-    
-    for group in (unargumented, argumented, variadic):
-        for index in range(0, len(group)):
-            item = group[index]
-            map = {}
-            for elem in item:
-                map[elem[0]] = elem[1:]
-            group[index] = map
-    
-    generator = 'Generator' + shell
-    generator = globals()[generator]
-    generator = generator(program, unargumented, argumented, variadic, suggestion)
+    main(shell= shell, output= output, source= source)
 
