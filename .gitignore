@@ -6,3 +6,6 @@
 *.swp
 *.bak
 
+/bash
+/fish
+/zsh
