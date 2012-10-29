@@ -321,7 +321,7 @@ class GeneratorBASH:
 
 
 '''
-Completion script generator for FISH
+Completion script generator for fish
 '''
 class GeneratorFISH:
     '''
@@ -485,11 +485,12 @@ class GeneratorFISH:
                 longopt = []
                 for opt in options:
                     if opt.startswith('--'):
-                        longopt.append(opt)
+                        if ('complete' in item) and (opt in item['complete']):
+                            longopt.append(opt)
                     elif opt.startswith('-') and (len(opt) == 2):
                         shortopt.append(opt)
                 options = shortopt + longopt
-                if len(options) == 0:
+                if len(longopt) == 0:
                     continue
                 buf += 'complete --command %s' % self.program
                 if 'desc' in item:
@@ -503,6 +504,189 @@ class GeneratorFISH:
                 if len( longopt) > 0: buf +=  ' --long-option %s' %  longopt[0]
                 buf += '\n'
         
+        return buf
+
+
+
+'''
+Completion script generator for zsh
+'''
+class GeneratorZSH:
+    '''
+    Constructor
+    
+    @param  program:str                              The command to generate completion for
+    @param  unargumented:list<dict<str, list<str>>>  Specification of unargumented options
+    @param  argumented:list<dict<str, list<str>>>    Specification of argumented options
+    @param  variadic:list<dict<str, list<str>>>      Specification of variadic options
+    @param  suggestion:list<list<↑|str>>             Specification of argument suggestions
+    @param  default:dict<str, list<str>>?            Specification for optionless arguments
+    '''
+    def __init__(self, program, unargumented, argumented, variadic, suggestion, default):
+        self.program      = program
+        self.unargumented = unargumented
+        self.argumented   = argumented
+        self.variadic     = variadic
+        self.suggestion   = suggestion
+        self.default      = default
+    
+    
+    '''
+    Gets the argument suggesters for each option
+    
+    @return  :dist<str, str>  Map from option to suggester
+    '''
+    def __getSuggesters(self):
+        suggesters = {}
+        
+        for group in (self.unargumented, self.argumented, self.variadic):
+            for item in group:
+                if 'suggest' in item:
+                    suggester = item['suggest']
+                    for option in item['options']:
+                        suggesters[option] = suggester[0]
+        
+        for group in (self.unargumented, self.argumented, self.variadic):
+            for item in group:
+                if ('suggest' not in item) and ('bind' in item):
+                    bind = item['bind'][0]
+                    if bind in suggesters:
+                        suggester = suggesters[bind]
+                        for option in item['options']:
+                            suggesters[option] = suggester
+        
+        return suggesters
+    
+    
+    '''
+    Gets the file pattern for each option
+    
+    @return  :dist<str, list<str>>  Map from option to file pattern
+    '''
+    def __getFiles(self):
+        files = {}
+        
+        for group in (self.unargumented, self.argumented, self.variadic):
+            for item in group:
+                if 'files' in item:
+                    _files = item['files']
+                    for option in item['options']:
+                        files[option] = _files
+        
+        for group in (self.unargumented, self.argumented, self.variadic):
+            for item in group:
+                if ('files' not in item) and ('bind' in item):
+                    bind = item['bind'][0]
+                    if bind in files:
+                        _files = files[bind]
+                        for option in item['options']:
+                            files[option] = _files
+        
+        return files
+    
+    
+    '''
+    Returns the generated code
+    
+    @return  :str  The generated code
+    '''
+    def get(self):
+        buf = '# zsh completion for %s         -*- shell-script -*-\n\n' % self.program
+        
+        files = self.__getFiles()
+        
+        suggesters = self.__getSuggesters()
+        suggestFunctions = {}
+        for function in self.suggestion:
+            suggestFunctions[function[0]] = function[1:]
+        
+        def verb(text):
+            temp = text
+            for char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+=/@:\'':
+                temp = temp.replace(char, '')
+            if len(temp) == 0:
+                return text
+            return '\'' + text.replace('\'', '\'\\\'\'') + '\''
+        
+        def makeexec(functionType, function):
+            if functionType in ('exec', 'pipe', 'fullpipe', 'cat', 'and', 'or'):
+                elems = [(' %s ' % makeexec(item[0], item[1:]) if isinstance(item, list) else verb(item)) for item in function]
+                if functionType == 'exec':
+                    return ' $( %s ) ' % (' '.join(elems))
+                if functionType == 'pipe':
+                    return ' ( %s ) ' % (' | '.join(elems))
+                if functionType == 'fullpipe':
+                    return ' ( %s ) ' % (' |% '.join(elems))
+                if functionType == 'cat':
+                    return ' ( %s ) ' % (' ; '.join(elems))
+                if functionType == 'and':
+                    return ' ( %s ) ' % (' && '.join(elems))
+                if functionType == 'or':
+                    return ' ( %s ) ' % (' || '.join(elems))
+            if functionType in ('params', 'verbatim'):
+                return ' '.join([verb(item) for item in function])
+            return ' '.join([verb(functionType)] + [verb(item) for item in function])
+        
+        index = 0
+        for name in suggestFunctions:
+            suggestion = '';
+            for function in suggestFunctions[name]:
+                functionType = function[0]
+                function = function[1:]
+                if functionType == 'verbatim':
+                    suggestion += '(%s)' % (' '.join([verb(item) for item in function]))
+                elif functionType == 'ls':
+                    filter = ''
+                    if len(function) > 1:
+                        filter = ' | grep -v \\/%s\\$ | grep %s\\$' % (function[1], function[1])
+                    suggestion += '$(ls -1 --color=no %s%s)' % (function[0], filter)
+                elif functionType == 'exec':
+                    elem = makeexec(functionType, function)
+                    elem = elem[4:]
+                    elem = elem[:-3]
+                    suggestion += elem
+                elif functionType in ('pipe', 'fullpipe', 'cat', 'and', 'or'):
+                    suggestion += ('%s' if functionType == 'exec' else '$(%s)') % makeexec(functionType, function)
+                elif functionType == 'calc':
+                    expression = []
+                    for item in function:
+                        if isinstance(item, list):
+                            expression.append(('%s' if item[0] == 'exec' else '$(%s)') % makeexec(item[0], item[1:]))
+                        else:
+                            expression.append(verb(item))
+                    suggestion += '$(( %s ))' % (' '.join(expression))
+            if len(suggestion) > 0:
+                suggestFunctions[name] = '"' + suggestion + '"'
+        
+        buf += '_opts=(\n'
+        
+        for group in (self.unargumented, self.argumented, self.variadic):
+            for item in group:
+                options = item['options']
+                shortopt = []
+                longopt = []
+                for opt in options:
+                    if len(opt) > 2:
+                        if ('complete' in item) and (opt in item['complete']):
+                            longopt.append(opt)
+                    elif len(opt) == 2:
+                        shortopt.append(opt)
+                options = shortopt + longopt
+                if len(longopt) == 0:
+                    continue
+                buf += '    \'(%s)\'{%s}' % (' '.join(options), ','.join(options))
+                if 'desc' in item:
+                    buf += '"["%s"]"' % verb(' '.join(item['desc']))
+                if 'arg' in item:
+                    buf += ':%s' % verb(' '.join(item['arg']))
+                elif options[0] in suggesters:
+                    buf += ': '
+                if options[0] in suggesters:
+                    suggestion = suggestFunctions[suggesters[options[0]]]
+                    buf += ':%s' % suggestion
+                buf += '\n'
+        
+        buf += '    )\n_arguments "$_opts[@]"\n\n'
         return buf
 
 
