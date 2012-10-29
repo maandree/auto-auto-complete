@@ -23,7 +23,7 @@
 		((options -f --file --pony)       (complete --file --pony) (arg PONY)    (suggest pony-f)  (files -f *.pony)  (desc 'Specify the pony that should printed'))
 		((options +f ++file ++pony)       (complete ++file ++pony) (arg PONY)    (suggest pony+f)  (files -f *.pony)  (desc 'Specify the extrapony that should printed'))
 		((options -q --quote)             (complete --quote)       (arg PONY)    (suggest pony-q)  (files -f *.pony)  (desc 'Specify the pony that should quote herself'))
-		((options -b --bubble --balloon)  (complete --balloon)     (arg STYLE)   (suggest balloon) (files -f (case (ponysay *.say) (ponyhink *.think))  (desc 'Specify message balloon style'))
+		((options -b --bubble --balloon)  (complete --balloon)     (arg STYLE)   (suggest balloon) (files -f (case (ponysay *.say) (ponyhink *.think)))  (desc 'Specify message balloon style'))
 		((options -W --wrap)              (complete --wrap)        (arg COLUMN)  (suggest wrap)    (files -0)         (desc 'Specify wrapping column'))
 		((options +c --colour)            (complete --colour)      (arg ANSI-COLOUR)               (files -0)         (desc 'Specify colour of the balloon, balloon link and message'))
 		((options --colour-bubble --colour-balloon)                (arg ANSI-COLOUR)               (files -0)         (desc 'Specify colour of the balloon'))
