@@ -172,13 +172,15 @@ class GeneratorBASH:
     @param  argumented:list<dict<str, list<str>>>    Specification of argumented options
     @param  variadic:list<dict<str, list<str>>>      Specification of variadic options
     @param  suggestion:list<list<↑|str>>             Specification of argument suggestions
+    @param  default:dict<str, list<str>>?            Specification for optionless arguments
     '''
-    def __init__(self, program, unargumented, argumented, variadic, suggestion):
+    def __init__(self, program, unargumented, argumented, variadic, suggestion, default):
         self.program      = program
         self.unargumented = unargumented
         self.argumented   = argumented
         self.variadic     = variadic
         self.suggestion   = suggestion
+        self.default      = default
     
     
     '''
@@ -219,28 +221,6 @@ class GeneratorBASH:
         buf += '    local cur prev words cword\n'
         buf += '    _init_completion -n = || return\n\n'
         
-        options = []
-        for group in (self.unargumented, self.argumented, self.variadic):
-            for item in group:
-                if 'complete' in item:
-                    options += item['complete']
-        buf += '    options="%s"\n' % (' '.join(options))
-        buf += '    COMPREPLY=( $( compgen -W "$options" -- "$cur" ) )\n\n'
-        
-        suggesters = self.__getSuggesters()
-        suggestFunctions = {}
-        for function in self.suggestion:
-            suggestFunctions[function[0]] = function[1:]
-        
-        indenticals = {}
-        for option in suggesters:
-            suggester = suggestFunctions[suggesters[option]]
-            _suggester = str(suggester)
-            if _suggester not in indenticals:
-                indenticals[_suggester] = (suggester, [option])
-            else:
-                indenticals[_suggester][1].append(option)
-        
         def verb(text):
             temp = text
             for char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+=/@:\'':
@@ -268,13 +248,7 @@ class GeneratorBASH:
                 return ' '.join([verb(item) for item in function])
             return ' '.join([verb(functionType)] + [verb(item) for item in function])
         
-        index = 0
-        for _suggester in indenticals:
-            (suggester, options) = indenticals[_suggester]
-            conds = []
-            for option in options:
-                conds.append('[ $prev = "%s" ]' % option)
-            buf += '    %s %s; then\n' % ('if' if index == 0 else 'elif', ' || '.join(conds))
+        def makesuggestion(suggester):
             suggestion = '';
             for function in suggester:
                 functionType = function[0]
@@ -296,6 +270,43 @@ class GeneratorBASH:
                         else:
                             expression.append(verb(item))
                     suggestion += '" $(( %s ))"' % (' '.join(expression))
+            return suggestion
+        
+        suggesters = self.__getSuggesters()
+        suggestFunctions = {}
+        for function in self.suggestion:
+            suggestFunctions[function[0]] = function[1:]
+        
+        options = []
+        for group in (self.unargumented, self.argumented, self.variadic):
+            for item in group:
+                if 'complete' in item:
+                    options += item['complete']
+        buf += '    options="%s"' % (' '.join(options))
+        if self.default is not None:
+            defSuggest = self.default['suggest'][0]
+            if defSuggest is not None:
+                buf += '" %s"' % makesuggestion(suggestFunctions[defSuggest])
+        buf += '\n'
+        buf += '    COMPREPLY=( $( compgen -W "$options" -- "$cur" ) )\n\n'
+        
+        indenticals = {}
+        for option in suggesters:
+            suggester = suggestFunctions[suggesters[option]]
+            _suggester = str(suggester)
+            if _suggester not in indenticals:
+                indenticals[_suggester] = (suggester, [option])
+            else:
+                indenticals[_suggester][1].append(option)
+        
+        index = 0
+        for _suggester in indenticals:
+            (suggester, options) = indenticals[_suggester]
+            conds = []
+            for option in options:
+                conds.append('[ $prev = "%s" ]' % option)
+            buf += '    %s %s; then\n' % ('if' if index == 0 else 'elif', ' || '.join(conds))
+            suggestion = makesuggestion(suggester);
             if len(suggestion) > 0:
                 buf += '        suggestions=%s\n' % suggestion
                 buf += '        COMPREPLY=( $( compgen -W "$suggestions" -- "$cur" ) )\n'
@@ -321,13 +332,15 @@ class GeneratorFISH:
     @param  argumented:list<dict<str, list<str>>>    Specification of argumented options
     @param  variadic:list<dict<str, list<str>>>      Specification of variadic options
     @param  suggestion:list<list<↑|str>>             Specification of argument suggestions
+    @param  default:dict<str, list<str>>?            Specification for optionless arguments
     '''
-    def __init__(self, program, unargumented, argumented, variadic, suggestion):
+    def __init__(self, program, unargumented, argumented, variadic, suggestion, default):
         self.program      = program
         self.unargumented = unargumented
         self.argumented   = argumented
         self.variadic     = variadic
         self.suggestion   = suggestion
+        self.default      = default
     
     
     '''
@@ -452,6 +465,19 @@ class GeneratorFISH:
             if len(suggestion) > 0:
                 suggestFunctions[name] = suggestion
         
+        if self.default is not None:
+            buf += 'complete --command %s' % self.program
+            if 'desc' in item:
+                buf += ' --description %s' % verb(' '.join(item['desc']))
+            defFiles = self.default['files']
+            defSuggest = self.default['suggest'][0]
+            if defFiles is not None:
+                if (len(defFiles) == 1) and ('-0' in defFiles):
+                    buf += ' --no-files'
+            if defSuggest is not None:
+                buf += ' --arguments %s' % suggestFunctions[defSuggest]
+            buf += '\n'
+        
         for group in (self.unargumented, self.argumented, self.variadic):
             for item in group:
                 options = item['options']
@@ -469,7 +495,7 @@ class GeneratorFISH:
                 if 'desc' in item:
                     buf += ' --description %s' % verb(' '.join(item['desc']))
                 if options[0] in files:
-                    if (files[options[0]] == 1) and ('-0' in files[options[0]][0]):
+                    if (len(files[options[0]]) == 1) and ('-0' in files[options[0]][0]):
                         buf += ' --no-files'
                 if options[0] in suggesters:
                     buf += ' --arguments %s' % suggestFunctions[suggesters[options[0]]]
@@ -499,6 +525,7 @@ def main(shell, output, source):
     argumented = []
     variadic = []
     suggestion = []
+    default = None
     
     for item in source[1:]:
         if item[0] == 'unargumented':
@@ -509,6 +536,8 @@ def main(shell, output, source):
             variadic.append(item[1:]);
         elif item[0] == 'suggestion':
             suggestion.append(item[1:]);
+        elif item[0] == 'default':
+            default = item[1:];
     
     for group in (unargumented, argumented, variadic):
         for index in range(0, len(group)):
@@ -517,10 +546,15 @@ def main(shell, output, source):
             for elem in item:
                 map[elem[0]] = elem[1:]
             group[index] = map
+    if default is not None:
+        map = {}
+        for elem in default:
+            map[elem[0]] = elem[1:]
+        default = map
     
     generator = 'Generator' + shell.upper()
     generator = globals()[generator]
-    generator = generator(program, unargumented, argumented, variadic, suggestion)
+    generator = generator(program, unargumented, argumented, variadic, suggestion, default)
     code = generator.get()
     
     with open(output, 'wb') as file:

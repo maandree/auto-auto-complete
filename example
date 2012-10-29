@@ -1,5 +1,6 @@
 (ponysay
-
+	(default (arg MESSAGE) (files -0) (suggest message) (desc 'Message spoken by the pony'))
+	
 	(multiple unargumented
 		((options -h --help)                      (complete --help)        (desc 'Show summary of options'))
 		((options -v --version)                   (complete --version)     (desc 'Show version of program'))
@@ -38,6 +39,8 @@
 	(variadic (options ++f ++files ++ponies) (bind +f) (desc 'Specify the extraponies that may be printed'))
 	(variadic (options --q --quotes)         (bind -q) (desc 'Specify the pony that may quote themself'))
 	
+	(suggestion message (verbatim MESSAGE)
+	)
 	(suggestion pony-f  (exec "'/usr/bin/ponysay'" --onelist)
 	                    (no-exec ls "'/usr/share/ponysay/ponies'" .pony)
 	)
