@@ -634,18 +634,13 @@ class GeneratorZSH:
                 functionType = function[0]
                 function = function[1:]
                 if functionType == 'verbatim':
-                    suggestion += '(%s)' % (' '.join([verb(item) for item in function]))
+                    suggestion += ' %s ' % (' '.join([verb(item) for item in function]))
                 elif functionType == 'ls':
                     filter = ''
                     if len(function) > 1:
                         filter = ' | grep -v \\/%s\\$ | grep %s\\$' % (function[1], function[1])
-                    suggestion += '$(ls -1 --color=no %s%s)' % (function[0], filter)
-                elif functionType == 'exec':
-                    elem = makeexec(functionType, function)
-                    elem = elem[4:]
-                    elem = elem[:-3]
-                    suggestion += elem
-                elif functionType in ('pipe', 'fullpipe', 'cat', 'and', 'or'):
+                    suggestion += ' $(ls -1 --color=no %s%s) ' % (function[0], filter)
+                elif functionType in ('exec', 'pipe', 'fullpipe', 'cat', 'and', 'or'):
                     suggestion += ('%s' if functionType == 'exec' else '$(%s)') % makeexec(functionType, function)
                 elif functionType == 'calc':
                     expression = []
@@ -654,9 +649,9 @@ class GeneratorZSH:
                             expression.append(('%s' if item[0] == 'exec' else '$(%s)') % makeexec(item[0], item[1:]))
                         else:
                             expression.append(verb(item))
-                    suggestion += '$(( %s ))' % (' '.join(expression))
+                    suggestion += ' $(( %s )) ' % (' '.join(expression))
             if len(suggestion) > 0:
-                suggestFunctions[name] = '"' + suggestion + '"'
+                suggestFunctions[name] = suggestion
         
         buf += '_opts=(\n'
         
@@ -678,15 +673,15 @@ class GeneratorZSH:
                 if 'desc' in item:
                     buf += '"["%s"]"' % verb(' '.join(item['desc']))
                 if 'arg' in item:
-                    buf += ':%s' % verb(' '.join(item['arg']))
+                    buf += '":%s"' % verb(' '.join(item['arg']))
                 elif options[0] in suggesters:
-                    buf += ': '
+                    buf += '": "'
                 if options[0] in suggesters:
                     suggestion = suggestFunctions[suggesters[options[0]]]
-                    buf += ':%s' % suggestion
+                    buf += '":( %s )"' % suggestion
                 buf += '\n'
         
-        buf += '    )\n_arguments "$_opts[@]"\n\n'
+        buf += '    )\n\n_arguments "$_opts[@]"\n\n'
         return buf
 
 
