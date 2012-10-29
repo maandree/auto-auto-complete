@@ -233,7 +233,7 @@ class GeneratorBASH:
             if functionType in ('exec', 'pipe', 'fullpipe', 'cat', 'and', 'or'):
                 elems = [(' %s ' % makeexec(item[0], item[1:]) if isinstance(item, list) else verb(item)) for item in function]
                 if functionType == 'exec':
-                    return ' "$( %s )" ' % (' '.join(elems))
+                    return ' $( %s ) ' % (' '.join(elems))
                 if functionType == 'pipe':
                     return ' ( %s ) ' % (' | '.join(elems))
                 if functionType == 'fullpipe':
@@ -254,14 +254,14 @@ class GeneratorBASH:
                 functionType = function[0]
                 function = function[1:]
                 if functionType == 'verbatim':
-                    suggestion += '" %s"' % (' '.join([verb(item) for item in function]))
+                    suggestion += ' %s' % (' '.join([verb(item) for item in function]))
                 elif functionType == 'ls':
                     filter = ''
                     if len(function) > 1:
                         filter = ' | grep -v \\/%s\\$ | grep %s\\$' % (function[1], function[1])
-                    suggestion += '" $(ls -1 --color=no %s%s)"' % (function[0], filter)
+                    suggestion += ' $(ls -1 --color=no %s%s)' % (function[0], filter)
                 elif functionType in ('exec', 'pipe', 'fullpipe', 'cat', 'and', 'or'):
-                    suggestion += ('" %s"' if functionType == 'exec' else '" $(%s)"') % makeexec(functionType, function)
+                    suggestion += (' %s' if functionType == 'exec' else ' $(%s)') % makeexec(functionType, function)
                 elif functionType == 'calc':
                     expression = []
                     for item in function:
@@ -269,8 +269,8 @@ class GeneratorBASH:
                             expression.append(('%s' if item[0] == 'exec' else '$(%s)') % makeexec(item[0], item[1:]))
                         else:
                             expression.append(verb(item))
-                    suggestion += '" $(( %s ))"' % (' '.join(expression))
-            return suggestion
+                    suggestion += ' $(( %s ))' % (' '.join(expression))
+            return '"' + suggestion + '"'
         
         suggesters = self.__getSuggesters()
         suggestFunctions = {}
@@ -282,11 +282,11 @@ class GeneratorBASH:
             for item in group:
                 if 'complete' in item:
                     options += item['complete']
-        buf += '    options="%s"' % (' '.join(options))
+        buf += '    options="%s "' % (' '.join(options))
         if self.default is not None:
             defSuggest = self.default['suggest'][0]
             if defSuggest is not None:
-                buf += '" %s"' % makesuggestion(suggestFunctions[defSuggest])
+                buf += '%s' % makesuggestion(suggestFunctions[defSuggest])
         buf += '\n'
         buf += '    COMPREPLY=( $( compgen -W "$options" -- "$cur" ) )\n\n'
         
@@ -424,7 +424,7 @@ class GeneratorFISH:
             if functionType in ('exec', 'pipe', 'fullpipe', 'cat', 'and', 'or'):
                 elems = [(' %s ' % makeexec(item[0], item[1:]) if isinstance(item, list) else verb(item)) for item in function]
                 if functionType == 'exec':
-                    return ' "$( %s )" ' % (' '.join(elems))
+                    return ' $( %s ) ' % (' '.join(elems))
                 if functionType == 'pipe':
                     return ' ( %s ) ' % (' | '.join(elems))
                 if functionType == 'fullpipe':
@@ -446,14 +446,14 @@ class GeneratorFISH:
                 functionType = function[0]
                 function = function[1:]
                 if functionType == 'verbatim':
-                    suggestion += '" %s"' % (' '.join([verb(item) for item in function]))
+                    suggestion += ' %s' % (' '.join([verb(item) for item in function]))
                 elif functionType == 'ls':
                     filter = ''
                     if len(function) > 1:
                         filter = ' | grep -v \\/%s\\$ | grep %s\\$' % (function[1], function[1])
-                    suggestion += '" $(ls -1 --color=no %s%s)"' % (function[0], filter)
+                    suggestion += ' $(ls -1 --color=no %s%s)' % (function[0], filter)
                 elif functionType in ('exec', 'pipe', 'fullpipe', 'cat', 'and', 'or'):
-                    suggestion += ('" %s"' if functionType == 'exec' else '" $(%s)"') % makeexec(functionType, function)
+                    suggestion += (' %s' if functionType == 'exec' else ' $(%s)') % makeexec(functionType, function)
                 elif functionType == 'calc':
                     expression = []
                     for item in function:
@@ -461,9 +461,9 @@ class GeneratorFISH:
                             expression.append(('%s' if item[0] == 'exec' else '$(%s)') % makeexec(item[0], item[1:]))
                         else:
                             expression.append(verb(item))
-                    suggestion += '" $(( %s ))"' % (' '.join(expression))
+                    suggestion += ' $(( %s ))' % (' '.join(expression))
             if len(suggestion) > 0:
-                suggestFunctions[name] = suggestion
+                suggestFunctions[name] = '"' + suggestion + '"'
         
         if self.default is not None:
             buf += 'complete --command %s' % self.program
