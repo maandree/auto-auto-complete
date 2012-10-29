@@ -424,7 +424,7 @@ class GeneratorFISH:
             if functionType in ('exec', 'pipe', 'fullpipe', 'cat', 'and', 'or'):
                 elems = [(' %s ' % makeexec(item[0], item[1:]) if isinstance(item, list) else verb(item)) for item in function]
                 if functionType == 'exec':
-                    return ' $( %s ) ' % (' '.join(elems))
+                    return ' ( %s ) ' % (' '.join(elems))
                 if functionType == 'pipe':
                     return ' ( %s ) ' % (' | '.join(elems))
                 if functionType == 'fullpipe':
@@ -451,23 +451,24 @@ class GeneratorFISH:
                     filter = ''
                     if len(function) > 1:
                         filter = ' | grep -v \\/%s\\$ | grep %s\\$' % (function[1], function[1])
-                    suggestion += ' $(ls -1 --color=no %s%s)' % (function[0], filter)
+                    suggestion += ' (ls -1 --color=no %s%s)' % (function[0], filter)
                 elif functionType in ('exec', 'pipe', 'fullpipe', 'cat', 'and', 'or'):
                     suggestion += (' %s' if functionType == 'exec' else ' $(%s)') % makeexec(functionType, function)
-                elif functionType == 'calc':
-                    expression = []
-                    for item in function:
-                        if isinstance(item, list):
-                            expression.append(('%s' if item[0] == 'exec' else '$(%s)') % makeexec(item[0], item[1:]))
-                        else:
-                            expression.append(verb(item))
-                    suggestion += ' $(( %s ))' % (' '.join(expression))
+                #elif functionType == 'calc':
+                #    expression = []
+                #    for item in function:
+                #        if isinstance(item, list):
+                #            expression.append(('%s' if item[0] == 'exec' else '$(%s)') % makeexec(item[0], item[1:]))
+                #        else:
+                #            expression.append(verb(item))
+                #    suggestion += ' $(( %s ))' % (' '.join(expression))
             if len(suggestion) > 0:
                 suggestFunctions[name] = '"' + suggestion + '"'
         
         if self.default is not None:
+            item = self.default
             buf += 'complete --command %s' % self.program
-            if 'desc' in item:
+            if 'desc' in self.default:
                 buf += ' --description %s' % verb(' '.join(item['desc']))
             defFiles = self.default['files']
             defSuggest = self.default['suggest'][0]
@@ -500,8 +501,8 @@ class GeneratorFISH:
                         buf += ' --no-files'
                 if options[0] in suggesters:
                     buf += ' --arguments %s' % suggestFunctions[suggesters[options[0]]]
-                if len(shortopt) > 0: buf += ' --short-option %s' % shortopt[0]
-                if len( longopt) > 0: buf +=  ' --long-option %s' %  longopt[0]
+                if len(shortopt) > 0: buf += ' --short-option %s' % shortopt[0][1:]
+                if len( longopt) > 0: buf +=  ' --long-option %s' %  longopt[0][2:]
                 buf += '\n'
         
         return buf
