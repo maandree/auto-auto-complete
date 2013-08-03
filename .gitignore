@@ -2,6 +2,8 @@ _/
 \#*\#
 .*
 !.git*
+/dist/*/*/*
+!/dist/archlinux/*/PKGBUILD
 *~
 *.swp
 *.swo
