@@ -24,7 +24,7 @@ all: auto-auto-complete #doc
 
 auto-auto-complete: auto-auto-complete.py
 	cp "$<" "$@"
-	sed -i 's:#!/usr/bin/env python3:#!$(SHEBANG)":' "$@"
+	sed -i 's:#!/usr/bin/env python3:#!$(SHEBANG):' "$@"
 
 install: auto-auto-complete #auto-auto-complete.info.gz
 	install -dm755 "$(DESTDIR)$(PREFIX)$(BIN)"
