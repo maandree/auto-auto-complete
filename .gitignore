@@ -1,10 +1,13 @@
-/_/
-
-*~
+_/
 \#*\#
-.\#*
+.*
+!.git*
+*~
 *.swp
+*.swo
 *.bak
+*.gz
+/auto-auto-complete
 
 /bash
 /fish
