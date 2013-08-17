@@ -49,7 +49,7 @@ Abort the program
 '''
 def abort(text, returncode = 1):
     printerr('\033[01;31m%s\033[00m' % text)
-    sys.exit(returnvalue)
+    sys.exit(returncode)
 
 
 
