@@ -1,0 +1,78 @@
+auto-auto-complete ::= _ program _
+
+program ::= '(' _ value _ body ')'
+
+body ::= [{(multiple | default | unargumented | argumented | variadic | suggestion) _}]
+
+_value ::= __ name | _ value | _ case
+
+value ::= name | variable | case
+
+variable ::= '(' _ "value" __ name _ [{value _}] ')'
+
+case ::= '(' _ "case" {_ a_case} _ ')'
+
+a_case ::= '(' {_ value} _ ')'
+
+multiple ::= '(' _ "multiple" <keyword=_value> [{_ '(' _ <item=anything> _ ')'}] _ ')'
+         ==> [{'(' <keyword> ' ' <item>  ')'}]
+
+anything ::= [{_ value | _ '(' anything _ ')'}]
+
+default ::= '(' _ "default" (4-:_ ) _ ')'
+
+unargumented ::= '(' _ "unargumented" (3-:_ (options | complete | desc)) _ ')'
+
+argumented ::= '(' _ "argumented" (6-:_ (options | complete | arg | suggest | files | bind | desc)) _ ')'
+
+variadic ::= '(' _ "variadic" (6-:_ (options | complete | arg | suggest | files | bind | desc)) _ ')'
+
+options ::= '(' _ "options" _value [{_ value}] ')'
+
+complete ::= '(' _ "complete" _value [{_ value}] ')'
+
+arg ::= '(' _ "arg" _value ')'
+
+suggest ::= '(' _ "suggest" _value ')'
+
+files ::= '(' _ "files" _value [{_ value}] ')'
+::=  {"-0" | "-a" | "-d" | "-D" | "-f" | "-l" | "-r"} [{value}]
+
+bind ::= '(' _ "bind" _value ')'
+
+desc ::= '(' _ "desc" _value ')'
+
+suggestion ::= '(' _ "suggestion" _ value {_ a_suggestion} _ ')'
+
+a_suggestion ::= '(' _ (exec | noexec | ls | verbatim | calc) _ ')'
+
+exec ::= 'exec' (__ value | _ any_exec) [{_ value | _ any_exec}]
+
+noexec ::= ls | verbatim
+
+ls ::= 'ls' _value [_ value]
+
+verbatim ::= 'verbatim' _value [{_ value}]
+
+calc ::= 'calc' (__ value | _ any_exec) [{_ value | _ any_exec}]
+
+any_exec ::= exec_type (__ value | _ any_exec) [{_ value | _ any_exec}]
+
+exec_type ::= 'exec' | 'calc' | 'pipe' | 'fullpipe' | 'cat' | 'and' | 'or'
+
+name ::= {letter | escape | squote | dquote}
+
+letter :: $any ^ ' ' ^ \t ^ \n ^ \r ^ \t ^ '\' ^ \' ^ \"
+
+escape ::= '\' $any
+
+squote ::= \' [{$any ^ '\' ^ \' | escape}] \'
+
+dquote ::= \" [{$any ^ '\' ^ \" | escape}] \"
+
+comment ::= ('#' | ';') [{$any}] \z
+
+__ ::= {' ' | \t | \n | \r | \f | comment}
+
+_ ::= [__]
+
