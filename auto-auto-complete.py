@@ -743,16 +743,24 @@ def main(shell, output, source):
         elif item[0] == 'default':
             default = item[1:];
     
-    for group in (unargumented, argumented, variadic):
+    for (group, not_allowed) in ((unargumented, ['arg', 'suggest', 'files']), (argumented, []), (variadic, [])):
         for index in range(0, len(group)):
             item = group[index]
             map = {}
             for elem in item:
+                if elem[0] not in ('options', 'complete', 'arg', 'suggest', 'files', 'bind', 'desc'):
+                    abort('Unrecognised keyword: ' + elem[0])
+                if elem[0] in not_allowed:
+                    abort('Out of context keyword: ' + elem[0])
                 map[elem[0]] = elem[1:]
             group[index] = map
     if default is not None:
         map = {}
         for elem in default:
+            if elem[0] not in ('arg', 'suggest', 'files', 'desc'):
+                abort('Unrecognised keyword: ' + elem[0])
+            if elem[0] in ('bind', 'options', 'complete'):
+                abort('Out of context keyword: ' + elem[0])
             map[elem[0]] = elem[1:]
         default = map
     
