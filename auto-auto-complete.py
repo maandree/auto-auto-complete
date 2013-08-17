@@ -778,11 +778,11 @@ def main(shell, output, source):
 mane!
 '''
 if __name__ == '__main__':
-    if len(sys.argv) != 6:
+    if len(sys.argv) == 0:
         print("USAGE: auto-auto-complete SHELL --output OUTPUT_FILE --source SOURCE_FILE")
         exit(2)
     
-    shell = sys.argv[1]
+    shell = None
     output = None
     source = None
     
@@ -802,12 +802,14 @@ if __name__ == '__main__':
         if old is not None:
             abort('Duplicate option: ' + option)
     
-    for arg in sys.argv[2:]:
+    for arg in sys.argv[1:]:
         if option is not None:
             if option in aliases:
                 option = aliases[option]
             useopt(option, arg)
             option = None
+        elif (shell is None) and not arg.startswith('-'):
+            shell = arg
         else:
             if '=' in arg:
                 useopt(arg[:index('=')], arg[index('=') + 1:])
