@@ -41,6 +41,17 @@ def printerr(text = '', end = '\n'):
     sys.stderr.buffer.write((str(text) + end).encode('utf-8'))
 
 
+'''
+Abort the program
+
+@param   text:str        Error message
+@return  returncode:int  The programs return code
+'''
+def abort(text, returncode = 1):
+    printerr('\033[01;31m%s\033[00m' % text)
+    sys.exit(returnvalue)
+
+
 
 
 '''
@@ -132,7 +143,7 @@ class Parser:
                 col = 0
                 char = 0
         
-        raise Exception('premature end of file')
+        abort('premature end of file')
     
     
     '''
@@ -761,7 +772,7 @@ mane!
 if __name__ == '__main__':
     if len(sys.argv) != 6:
         print("USAGE: auto-auto-complete SHELL --output OUTPUT_FILE --source SOURCE_FILE")
-        exit(1)
+        exit(2)
     
     shell = sys.argv[1]
     output = None
@@ -779,9 +790,9 @@ if __name__ == '__main__':
         if   option == '--output': old = output; output = arg
         elif option == '--source': old = source; source = arg
         else:
-            raise Exception('Unrecognised option: ' + option)
+            abort('Unrecognised option: ' + option)
         if old is not None:
-            raise Exception('Duplicate option: ' + option)
+            abort('Duplicate option: ' + option)
     
     for arg in sys.argv[2:]:
         if option is not None:
@@ -795,8 +806,8 @@ if __name__ == '__main__':
             else:
                 option = arg
     
-    if output is None: raise Exception('Unused option: --output')
-    if source is None: raise Exception('Unused option: --source')
+    if output is None: abort('Unused option: --output')
+    if source is None: abort('Unused option: --source')
     
     main(shell= shell, output= output, source= source)
 
