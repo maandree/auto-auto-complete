@@ -56,9 +56,9 @@ verbatim ::= 'verbatim' _value [{_ value}]
 
 calc ::= 'calc' (__ value | _ any_exec) [{_ value | _ any_exec}]
 
-any_exec ::= exec_type (__ value | _ any_exec) [{_ value | _ any_exec}]
+any_exec ::= '(' _ exec_type (__ value | _ any_exec) [{_ value | _ any_exec}] _ ')'
 
-exec_type ::= 'exec' | 'calc' | 'pipe' | 'fullpipe' | 'cat' | 'and' | 'or'
+exec_type ::= "exec" | "calc" | "pipe" | "fullpipe" | "cat" | "and" | "or"
 
 name ::= {letter | escape | squote | dquote}
 
