@@ -153,6 +153,7 @@ class Parser:
     '''
     @staticmethod
     def simplify(tree):
+        global variables
         program = tree[0]
         stack = [tree]
         while len(stack) > 0:
@@ -171,6 +172,17 @@ class Parser:
                             if alt[0] == program:
                                 new.append(alt[1])
                                 break
+                        edited = True
+                    elif item[0] == 'value':
+                        variable = item[1]
+                        if variable in variables:
+                            for value in variables[variable]:
+                                new.append(value)
+                        else:
+                            if len(item) == 2:
+                                abort('Undefined variable: ' + variable)
+                            for value in item[2:]:
+                                new.append(value)
                         edited = True
                     else:
                         new.append(item)
@@ -778,13 +790,14 @@ def main(shell, output, source):
 mane!
 '''
 if __name__ == '__main__':
-    if len(sys.argv) == 0:
-        print("USAGE: auto-auto-complete SHELL --output OUTPUT_FILE --source SOURCE_FILE")
+    if len(sys.argv) < 4:
+        print("USAGE: auto-auto-complete SHELL --output OUTPUT_FILE --source SOURCE_FILE [VARIABLE=VALUE...]")
         exit(2)
     
     shell = None
     output = None
     source = None
+    variables = {}
     
     option = None
     aliases = {'-o' : '--output',
@@ -794,9 +807,14 @@ if __name__ == '__main__':
     def useopt(option, arg):
         global source
         global output
+        global variables
         old = None
         if   option == '--output': old = output; output = arg
         elif option == '--source': old = source; source = arg
+        elif not option.startswith('-'):
+            if option not in variables:
+                variables[option] = []
+            variables[option].append(arg)
         else:
             abort('Unrecognised option: ' + option)
         if old is not None:
@@ -812,7 +830,7 @@ if __name__ == '__main__':
             shell = arg
         else:
             if '=' in arg:
-                useopt(arg[:index('=')], arg[index('=') + 1:])
+                useopt(arg[:arg.index('=')], arg[arg.index('=') + 1:])
             else:
                 option = arg
     
