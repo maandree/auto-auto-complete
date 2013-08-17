@@ -63,6 +63,10 @@ class Parser:
         quote = None
         buf = None
         
+        col = 0
+        char = 0
+        line = 1
+        
         for charindex in range(0, len(code)):
             c = code[charindex]
             if comment:
@@ -118,6 +122,15 @@ class Parser:
                     quote = c
                 else:
                     buf += c
+            
+            if c == '\t':
+                col |= 7
+            col += 1
+            char += 1
+            if c in '\n\r\f':
+                line += 1
+                col = 0
+                char = 0
         
         raise Exception('premature end of file')
     
