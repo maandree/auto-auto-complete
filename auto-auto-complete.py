@@ -273,7 +273,7 @@ class GeneratorBASH:
                 if functionType == 'pipe':
                     return ' ( %s ) ' % (' | '.join(elems))
                 if functionType == 'fullpipe':
-                    return ' ( %s ) ' % (' |% '.join(elems))
+                    return ' ( %s ) ' % (' |& '.join(elems))
                 if functionType == 'cat':
                     return ' ( %s ) ' % (' ; '.join(elems))
                 if functionType == 'and':
@@ -464,7 +464,7 @@ class GeneratorFISH:
                 if functionType == 'pipe':
                     return ' ( %s ) ' % (' | '.join(elems))
                 if functionType == 'fullpipe':
-                    return ' ( %s ) ' % (' |% '.join(elems))
+                    return ' ( %s ) ' % (' |& '.join(elems))
                 if functionType == 'cat':
                     return ' ( %s ) ' % (' ; '.join(elems))
                 if functionType == 'and':
@@ -653,7 +653,7 @@ class GeneratorZSH:
                 if functionType == 'pipe':
                     return ' ( %s ) ' % (' | '.join(elems))
                 if functionType == 'fullpipe':
-                    return ' ( %s ) ' % (' |% '.join(elems))
+                    return ' ( %s ) ' % (' |& '.join(elems))
                 if functionType == 'cat':
                     return ' ( %s ) ' % (' ; '.join(elems))
                 if functionType == 'and':
