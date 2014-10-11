@@ -53,6 +53,7 @@ Texts. A copy of the license is included in the section entitled
 @menu
 * Overview::                        Brief overview of @command{auto-auto-complete}.
 * Invoking::                        Invocation of @command{auto-auto-complete}.
+* Syntax::                          The auto-auto-complete syntax.
 * GNU Free Documentation License::  Copying and sharing this manual.
 @end menu
 
@@ -109,6 +110,59 @@ and @code{--file}, add the arguments @option{srcopt=-s},
 @option{srcopt=-f}, @option{srcopt=--source} and
 @option{srcopt=--file}. It is not possible to have
 variable whose name begin with a dash (`-').
+
+
+
+@node Syntax
+@chapter Syntax
+
+@command{auto-auto-complete} uses a LISP-like free form
+syntax. Valid whitespace is normal blank space, horizontal
+tab space@footnote{Also know simply as tab.},
+carriage return@footnote{The first character in a new line
+in for example the HTTP protocol and in Window's encoding
+for new lines, it was the new line character in the classical
+Mac operating systems}, line feed (new line) and form feed
+(new page). Comments can be started with either a semicolon
+(;) or a hash (#). Comments end at the next following
+new line, which may either be a carriage return, line feed
+or form feed. Comments cannot be started inside quotes.
+
+The backslash character (\) can be used to force the
+following character to be parsed verbatim, this is called
+escaping. It is highly discourage to use this to escape
+new lines, especially if the new line encoding used in the
+document is carrige return–line feed, as that would only
+escape the carrige return. There is also a set of characters
+that have a special meaning when they are escaped:
+
+@table @asis
+@item a
+Audible bell character.
+@item b
+Backspace character.
+@item e
+Escape character.
+@item f
+Form feed character.
+@item n
+Line feed character.
+@item r
+Carriage character.
+@item t
+Horizontal tab space character.
+@item v
+Vertical tab space character.
+@item 0
+Null character.
+@end table
+
+Quotes, either simple quotes (') or double quotes (")
+can be used to parse all character verbatim except
+backslash (\). A quote ends at the next quote character
+that is not escaped by a backslash (\) and is identical
+to the opening quote character. This is especially useful
+for escaping whitespace and round brackets.
 
 
 
