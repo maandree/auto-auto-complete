@@ -147,17 +147,17 @@ install-info: bin/auto-auto-complete.info
 .PHONY: install-pdf
 install-pdf: bin/auto-auto-complete.pdf
 	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
-	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).pdf"
+	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/$(PKGNAME).pdf"
 
 .PHONY: install-ps
 install-ps: bin/auto-auto-complete.ps
 	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
-	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).ps"
+	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/$(PKGNAME).ps"
 
 .PHONY: install-dvi
 install-dvi: bin/auto-auto-complete.dvi
 	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
-	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).dvi"
+	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/$(PKGNAME).dvi"
 
 # Install shell auto-completion
 
@@ -187,12 +187,12 @@ uninstall:
 	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/COPYING"
 	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
 	-rmdir -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
+	-rm -- "$(DESTDIR)$(INFODIR)/$(PKGNAME).info"
+	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/$(PKGNAME).pdf"
+	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/$(PKGNAME).ps"
+	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/$(PKGNAME).dvi"
 	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/example"
 	-rmdir -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)"
-	-rm -- "$(DESTDIR)$(INFODIR)/$(PKGNAME).info"
-	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).pdf"
-	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).ps"
-	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).dvi"
 	-rm -- "$(DESTDIR)$(DATADIR)/fish/completions/$(COMMAND).fish"
 	-rmdir -- "$(DESTDIR)$(DATADIR)/fish/completions"
 	-rmdir -- "$(DESTDIR)$(DATADIR)/fish"
