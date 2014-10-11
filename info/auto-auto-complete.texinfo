@@ -272,7 +272,6 @@ To keep this example short we will truncate this to:
 )
 @end example
 
-@page
 @command{ponysay} also have a number of options that does
 take an argument. We will add a few of them.
 
@@ -342,7 +341,6 @@ Suggest sockets.
 Suggest doors.
 @end table
 
-@page
 @example
 ((value command ponysay)
   (multiple unargumented ...) ;We have cut out the options.
@@ -506,6 +504,112 @@ Notice that we used @code{-f} for the element in @code{(bind)},
 this is because we want @option{--f}, @option{--files} and
 @code{--ponies} to have the same configurations (with exception
 for the description) as the @option{-f} option.
+
+Once again, to make the example shorter we will cut out
+some parts.
+
+@example
+( ;We have cut out everything but the (suggestion):s.
+  (suggestion message) ;We will fill this in later...
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+@end example
+
+For @code{(suggestion message)} we want the word
+`MESSAGE' to be suggested to let the user know
+that the non-option arguments make up the message
+that is printed (if used).
+
+@example
+( ;We have cut out everything but the (suggestion):s.
+  (suggestion message (verbatim MESSAGE))
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+@end example
+
+For @code{(suggestion pony-f)} we want, in addition
+to the .pony-files which as already been configured,
+.pony-files from @file{/usr/share/ponysay/ponies}
+to be suggested without the .pony-suffix.
+
+@example
+( ;We have cut out everything but the (suggestion):s.
+  (suggestion message (verbatim MESSAGE))
+  (suggestion pony-f (ls "'/usr/share/ponysay/ponies'" .pony))
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+@end example
+
+However, if the shell supports executing comments to
+get suggetions we want to utilise this.
+
+@example
+( ;We have cut out everything but the (suggestion):s.
+  (suggestion message (verbatim MESSAGE))
+  (suggestion pony-f (exec "'/usr/bin/ponysay'" --onelist)
+                     (noexec ls "'/usr/share/ponysay/ponies'" .pony))
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+@end example
+
+@code{(suggestion balloon)} will work very similarly.
+
+@example
+( ;We have cut out everything but the (suggestion):s.
+  (suggestion message (verbatim MESSAGE))
+  (suggestion pony-f (exec "'/usr/bin/ponysay'" --onelist)
+                     (noexec ls "'/usr/share/ponysay/ponies'" .pony))
+  (suggestion balloon (exec "'/usr/bin/ponysay'" --balloonlist)
+                      (no-exec ls "'/usr/share/ponysay/balloons'"
+                       (case (ponysay .say) (ponythink .think))))
+  (suggestion wrap) ;We will fill this in later...
+)
+@end example
+
+The first thing we want to do for @option{--wrap}
+is to give it some default suggestion.
+
+@example
+( ;We have cut out everything but (suggestion wrap)
+  (suggestion wrap (verbatim none inherit 100 60))
+)
+@end example
+
+The next step is to suggest the terminal's
+width minus 10 columns. In the Bash shell this
+can be calculated with
+@command{$(( $(stty size | cut -d ' ' -f 2) - 10 ))}.
+
+@example
+( ;We have cut out everything but (suggestion wrap)
+  (suggestion wrap
+     (verbatim none inherit 100 60)
+     (calc (pipe (stty size) (cut -d ' ' -f 2)) - 10)
+  )
+)
+@end example
+
+As seen here @code{(pipe (a) (b) (c))} translates into
+@code{(a | b | c)}. There are a few similar blocks that
+can be used.
+
+@table @code
+@item (fullpipe (a) (b) (c))
+@code{(a |& b |& c)}, or equivalently:
+@code{(a 2>&1 | b 2>&1 | c)}
+@item (cat (a) (b) (c))
+@code{(a ; b ; c)}
+@item (and (a) (b) (c))
+@code{(a && b && c)}
+@item (or (a) (b) (c))
+@code{(a || b || c)}
+@end table
 
 
 
