@@ -164,6 +164,349 @@ that is not escaped by a backslash (\) and is identical
 to the opening quote character. This is especially useful
 for escaping whitespace and round brackets.
 
+The rest of this chapter will demonstrate how to write a
+script by example of @command{ponysay} (because it uses
+most of the syntax).
+
+The first thing we do is to declare which command the
+script is for. We do this by creating the root brackets
+and put the name of the command as the first element.
+
+@example
+(ponysay)
+@end example
+
+However, @command{ponysay} has a very similar command
+called @command{ponythink}. It is sensible to let the
+same script be used for auto-complete for both commands,
+to do this we utilise that we can define variables
+when we invoke @command{auto-auto-complete}.
+
+@example
+((value command))
+@end example
+
+Now when we compile this script we need invoke
+@command{auto-auto-complete} with either
+@option{command=ponysay} or @option{command=ponythink}.
+If we want @command{ponysay} to be used if we
+do not specify a value for @var{command} we instead
+write:
+
+@example
+((value command ponysay))
+@end example
+
+Remember that we could give a variable multiple values.
+This can also be done here. However in this example
+we only want one value. For example, @command{((value var a b))}
+would generate @command{(a b)} if @var{var} has not been set.
+
+@command{ponysay} recognises the options @option{-h} and
+@option{--help} for printing a summary of recognised options.
+These options does not take any arguments and hence are specified
+with @code{(unargumented)}.
+
+@example
+((value command ponysay)
+  (unargumented (options -h --help)
+                (desc 'Show summary of options'))
+)
+@end example
+
+This only specifies that these option exists, if we also want
+the generated scripts to suggest @option{--help} we need to
+add @code{(complete --help)}.
+
+@example
+((value command ponysay)
+  (unargumented (options -h --help)
+                (complete --help)
+                (desc 'Show summary of options'))
+)
+@end example
+
+Now that we have our first option, lets add a few others, to
+keep the example short, we will skip the most of the options.
+
+@example
+((value command ponysay)
+  (unargumented (options -h --help)
+                (complete --help)
+                (desc 'Show summary of options'))
+  (unargumented (options -l --list)
+                (complete --list)
+                (desc 'List all MLP:FiM ponies'))
+  (unargumented (options +l ++list)
+                (complete ++list)
+                (desc 'List all non-MLP:FiM ponies'))
+  (unargumented (options -X --256-colours --256colours --x-colours)
+                (desc 'Use xterm colours'))
+)
+@end example
+
+Now (especially if we had added all options) we have many
+@code{(unargumented)} blocks. We can use @code{(multiple)}
+so we do not have to write @code{unargumented} so many times.
+
+@example
+((value command ponysay)
+  (multiple unargumented
+    ((options -h --help) (complete --help)
+     (desc 'Show summary of options'))
+    ((options -l --list) (complete --list)
+     (desc 'List all MLP:FiM ponies'))
+    ((options +l ++list) (complete ++list)
+     (desc 'List all non-MLP:FiM ponies'))
+    ((options -X --256-colours --256colours --x-colours)
+     (desc 'Use xterm colours'))
+  )
+)
+@end example
+
+To keep this example short we will truncate this to:
+
+@example
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+)
+@end example
+
+@page
+@command{ponysay} also have a number of options that does
+take an argument. We will add a few of them.
+
+@example
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony)
+     (desc 'Specify the pony that should printed'))
+    ((options -b --bubble --balloon) (complete --balloon)
+     (desc 'Specify message balloon style'))
+    ((options -W --wrap) (complete --wrap)
+     (desc 'Specify wrapping column'))
+    ((options +c --colour) (complete --colour)
+     (desc 'Specify colour of the balloon, balloon link and message'))
+  )
+)
+@end example
+
+Just like @command{ponysay --help} prints @code{--wrap COLUMN}
+to indicate that the argument for @option{--wrap} is is an
+index of the column where the message printed by @command{ponysay}
+is wrapped, shells could display the text @code{COLUMN} as
+a placeholder for the next argument when you have typed
+@option{--wrap}. To enable this in shells that support it,
+we use @code{(arg)}.
+
+@example
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony) (arg PONY)
+     (desc 'Specify the pony that should printed'))
+    ((options -b --bubble --balloon) (complete --balloon) (arg STYLE)
+     (desc 'Specify message balloon style'))
+    ((options -W --wrap) (complete --wrap) (arg COLUMN)
+     (desc 'Specify wrapping column)')
+    ((options +c --colour) (complete --colour) (arg ANSI-COLOUR)
+     (desc 'Specify colour of the balloon, balloon link and message'))
+  )
+)
+@end example
+
+The next step now is to specify the type of argument the options
+want. To do this we use @code{(files)}. The elements in @code{(files)}
+specify what type of file the shell should suggest. Multiple
+type can be used. Tehe recognsied ones are:
+
+@table @code
+@item -0
+Do not suggest files, or do not suggest files of types specified
+after @code{-0}.
+@item -a
+Suggest all files.
+@item -f
+Suggest regular files and pipes.
+@item -r
+Suggest regular files but not pipes.
+@item -d
+Suggest directories.
+@item -l
+Suggest symlinks. This is suggest by default,
+but @code{-0} can be used to stop this.
+@item -s
+Suggest sockets.
+@item -D
+Suggest doors.
+@end table
+
+@page
+@example
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony) (arg PONY)
+     (files -f)
+     (desc 'Specify the pony that should printed'))
+    ((options -b --bubble --balloon) (complete --balloon) (arg STYLE)
+     (files -f)
+     (desc 'Specify message balloon style'))
+    ((options -W --wrap) (complete --wrap) (arg COLUMN)
+     (files -0)
+     (desc Specify wrapping column))
+    ((options +c --colour) (complete --colour) (arg ANSI-COLOUR)
+     (files -0)
+     (desc 'Specify colour of the balloon, balloon link and message'))
+  )
+)
+@end example
+
+@code{(files)} can also be used to specify patterns (using
+@code{sh}-globbing) for the filenames of the files to suggest.
+For example @code{--pony} in @command{ponysay} should only,
+in respect to files, suggest files that end with @code{.pony}.
+
+@example
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony) (arg PONY)
+     (files -f *.pony)
+     (desc 'Specify the pony that should printed'))
+    ((options -b --bubble --balloon) (complete --balloon) (arg STYLE)
+     (files -f *.say)
+     (desc 'Specify message balloon style'))
+    ((options -W --wrap) (complete --wrap) (arg COLUMN)
+     (files -0)
+     (desc Specify wrapping column))
+    ((options +c --colour) (complete --colour) (arg ANSI-COLOUR)
+     (files -0)
+     (desc 'Specify colour of the balloon, balloon link and message'))
+  )
+)
+@end example
+
+For @option{--balloon} files ending with @code{.say} should be
+suggested if the completion is for @command{ponysay}, but for
+@command{ponythink} @code{.think}-files should be suggest.
+We can use @code{(case)} to select this based on the value of
+the first element in the root block, which is the name of the command.
+
+@example
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony) (arg PONY)
+     (files -f *.pony)
+     (desc 'Specify the pony that should printed'))
+    ((options -b --bubble --balloon) (complete --balloon) (arg STYLE)
+     (files -f (case (ponysay *.say) (ponythink *.think)))
+     (desc 'Specify message balloon style'))
+    ((options -W --wrap) (complete --wrap) (arg COLUMN)
+     (files -0)
+     (desc Specify wrapping column))
+    ((options +c --colour) (complete --colour) (arg ANSI-COLOUR)
+     (files -0)
+     (desc 'Specify colour of the balloon, balloon link and message'))
+  )
+)
+@end example
+
+Another part of options with arguments is suggestions that are not
+based on filenames.
+
+@example
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony) (arg PONY)
+     (suggest pony-f) (files -f *.pony)
+     (desc 'Specify the pony that should printed'))
+    ((options -b --bubble --balloon) (complete --balloon) (arg STYLE)
+     (suggest balloon)
+     (files -f (case (ponysay *.say) (ponythink *.think)))
+     (desc 'Specify message balloon style'))
+    ((options -W --wrap) (complete --wrap) (arg COLUMN)
+     (suggest wrap) (files -0)
+     (desc Specify wrapping column))
+    ((options +c --colour) (complete --colour) (arg ANSI-COLOUR)
+     (files -0)
+     (desc 'Specify colour of the balloon, balloon link and message'))
+  )
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+@end example
+
+Lets cut out the options again to make this shorter.
+
+@example
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented ...)   ;We have cut out the options.
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+@end example
+
+Another part of ponysay is that it will take also
+argument that are not associated with an option make
+make a message it prints out of thiat.
+
+@example
+((value command ponysay)
+  (default (arg MESSAGE) (files -0) (suggest message)
+   (desc 'Message spoken by the pony'))
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented ...)   ;We have cut out the options.
+  (suggestion message) ;We will fill this in later...
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+@end example
+
+A rather unusual part of @command{ponysay} is that
+it has variadic options. A variadic option is a option
+that takes all following arguments, unconditionally.
+For example, in @command{ponysay} you can write
+@code{--ponies twilight trixie} instead of
+@code{--pony twilight --pony trixie}. @code{(variadic)}
+is used to declare a variadic option. @code{(bind)}
+becomes interesting here; because @command{ponysay}'s
+variadic options have non-variadic counterparts, it
+is pleasant to reuse the non-variadic options'
+configurations. @code{(bind)} will copy everything
+that is missing except @code{(options)} and
+@code{(complete)}. In this example we will not
+use @code{(complete)} because we do not want variadic
+options to be suggest but we will use @code{(desc)}
+because we want to adjust the descriptions.
+
+@example
+((value command ponysay)
+  (default (arg MESSAGE) (files -0) (suggest message)
+   (desc 'Message spoken by the pony'))
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented ...)   ;We have cut out the options.
+  (variadic (options --f --files --ponies) (bind -f)
+            (desc 'Specify the ponies that may be printed'))
+  (suggestion message) ;We will fill this in later...
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+@end example
+
+Notice that we used @code{-f} for the element in @code{(bind)},
+this is because we want @option{--f}, @option{--files} and
+@code{--ponies} to have the same configurations (with exception
+for the description) as the @option{-f} option.
+
 
 
 @node GNU Free Documentation License
