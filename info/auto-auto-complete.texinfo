@@ -111,6 +111,17 @@ and @code{--file}, add the arguments @option{srcopt=-s},
 @option{srcopt=--file}. It is not possible to have
 variable whose name begin with a dash (`-').
 
+Alternatively you can run
+@command{auto-auto-complete SHELL --where COMMAND}
+(alternatively with @option{-w} instead of
+@option{--where}). This will print the pathname
+you should use for the generated file when installing
+it. However the path prefix will not be included,
+so if your package is installed to @file{/usr}
+@footnote{The command being installed to @file{/usr/bin}
+or @file{/usr/sbin}.}, you sould prepend @file{/usr}
+to the output.
+
 
 
 @node Syntax

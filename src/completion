@@ -14,6 +14,11 @@
 		    (arg OUTPUT_FILE)
 		    (files -f)
 		    (desc 'Specify the output shell auto-completion script'))
+	(argumented (options -w --where)
+		    (complete --where)
+		    (arg COMMAND)
+		    (files -0)
+		    (desc 'Specify a command whose shell auto-completion script path should be printed'))
 	
 	(suggestion default (verbatim bash zsh fish VARIABLE=VALUE))
 )
