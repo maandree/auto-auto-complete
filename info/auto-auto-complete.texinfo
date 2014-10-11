@@ -1,0 +1,120 @@
+\input texinfo   @c -*-texinfo-*-
+
+@c %**start of header
+@setfilename auto-auto-complete.info
+@settitle auto-auto-complete
+@afourpaper
+@documentencoding UTF-8
+@documentlanguage en
+@finalout
+@c %**end of header
+
+
+@dircategory Development
+@direntry
+* auto-auto-complete: (auto-auto-complete).        Autogenerate shell auto-completion scripts
+@end direntry
+
+
+@copying
+Copyright @copyright{} 2014 Mattias Andrée
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts. A copy of the license is included in the section entitled
+``GNU Free Documentation License''.
+@end quotation
+@end copying
+
+@ifnottex
+@node Top
+@top auto-auto-complete -- Autogenerate shell auto-completion scripts
+@insertcopying
+@end ifnottex
+
+@titlepage
+@title auto-auto-complete
+@subtitle Autogenerate shell auto-completion scripts
+@author by Mattias Andrée (maandree)
+
+@page
+@c @center `'
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+
+
+@menu
+* Overview::                        Brief overview of @command{auto-auto-complete}.
+* Invoking::                        Invocation of @command{auto-auto-complete}.
+* GNU Free Documentation License::  Copying and sharing this manual.
+@end menu
+
+
+
+@node Overview
+@chapter Overview
+
+@command{auto-auto-complete} provides a LISP-like
+@footnote{A sane alternative to using XML.} declarative
+language for creating auto-completion scripts for commands
+in a shell-agnostic way. The current version of
+@command{auto-auto-complete} can use such files to generate
+auto-completion scripts for the @command{bash}, @command{zsh}
+and @command{fish} shells.
+
+@command{auto-auto-complete}'s language limited in comparsion
+to for example raw auto-completion scripts for the @command{bash}
+shell, however it is well enough for most projects.
+
+
+
+@node Invoking
+@chapter Invoking
+
+@command{auto-auto-complete} recognises two options:
+
+@table @option
+@item -o
+@itemx --output OUTPUT_FILE
+Specifies the pathname of the generated file.
+
+@item -s
+@itemx -f
+@itemx --file
+@itemx --source SOURCE_FILE
+Specifies the pathname of the auto-auto-complete script.
+@end table
+
+Both of these options must be used. Additionally
+the shell that the generate file should be generated
+for must be specified; this is done by adding name
+of the shell as a stand-along argument, for example
+@command{auto-auto-complete bash --output mycmd.bash --source mycmd.autocomplete}
+
+It is also possible to define variables that can be
+used the auto-auto-complete script. If you, for example,
+want to give the variable @var{command} the value
+@code{mycmd}, add the argument @option{command=mycmd}.
+It is also possible to define arrays, for example
+if you want the variable @var{srcopt} to be an array
+of the for values @code{-s}, @code{-f}, @code{--source}
+and @code{--file}, add the arguments @option{srcopt=-s},
+@option{srcopt=-f}, @option{srcopt=--source} and
+@option{srcopt=--file}. It is not possible to have
+variable whose name begin with a dash (`-').
+
+
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include fdl.texinfo
+
+@bye
+

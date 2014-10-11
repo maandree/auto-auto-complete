@@ -31,10 +31,10 @@ PKGNAME = auto-auto-complete
 # Build rules
 
 .PHONY: default
-default: command # info # shell
+default: command info # shell
 
 .PHONY: all
-all: command # doc # shell
+all: command doc # shell
 
 
 # Build rules for the command
@@ -58,7 +58,7 @@ info: bin/auto-auto-complete.info
 bin/%.info: info/%.texinfo info/fdl.texinfo
 	@mkdir -p bin
 	makeinfo $<
-	mv $*.pdf $@
+	mv $*.info $@
 
 .PHONY: pdf
 pdf: bin/auto-auto-complete.pdf
@@ -72,14 +72,14 @@ dvi: bin/auto-auto-complete.dvi
 bin/%.dvi: info/%.texinfo info/fdl.texinfo
 	@mkdir -p obj bin
 	cd obj ; yes X | $(TEXI2DVI) ../$<
-	mv obj/$*.pdf $@
+	mv obj/$*.dvi $@
 
 .PHONY: ps
 ps: bin/auto-auto-complete.ps
 bin/%.ps: info/%.texinfo info/fdl.texinfo
 	@mkdir -p obj bin
 	cd obj ; yes X | texi2pdf --ps ../$<
-	mv obj/$*.pdf $@
+	mv obj/$*.ps $@
 
 
 # Build rules for shell auto-completion
@@ -109,7 +109,7 @@ bin/auto-auto-complete.fish: src/completion bin/auto-auto-complete
 # Install rules
 
 .PHONY: install
-install: install-base install-examples # install-info # install-shell
+install: install-base install-examples install-info # install-shell
 
 .PHONY: install
 install-all: install-base install-doc # install-shell
@@ -132,7 +132,7 @@ install-license:
 # Install documentation
 
 .PHONY: install-doc
-install-doc: install-examples # install-info install-pdf install-ps install-dvi
+install-doc: install-examples install-info install-pdf install-ps install-dvi
 
 .PHONY: install-examples
 install-examples: doc/example
