@@ -6,6 +6,7 @@ obj/
 !.git*
 /dist/*/*/*
 !/dist/archlinux/*/PKGBUILD
+!/dist/archlinux/*/auto-auto-complete.install
 *~
 *.swp
 *.swo
