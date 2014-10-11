@@ -576,7 +576,7 @@ The first thing we want to do for @option{--wrap}
 is to give it some default suggestion.
 
 @example
-( ;We have cut out everything but (suggestion wrap)
+( ;We have cut out everything but (suggestion wrap).
   (suggestion wrap (verbatim none inherit 100 60))
 )
 @end example
@@ -587,7 +587,7 @@ can be calculated with
 @command{$(( $(stty size | cut -d ' ' -f 2) - 10 ))}.
 
 @example
-( ;We have cut out everything but (suggestion wrap)
+( ;We have cut out everything but (suggestion wrap).
   (suggestion wrap
      (verbatim none inherit 100 60)
      (calc (pipe (stty size) (cut -d ' ' -f 2)) - 10)
