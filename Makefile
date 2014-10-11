@@ -31,10 +31,10 @@ PKGNAME = auto-auto-complete
 # Build rules
 
 .PHONY: default
-default: command info # shell
+default: command info shell
 
 .PHONY: all
-all: command doc # shell
+all: command doc shell
 
 
 # Build rules for the command
@@ -109,10 +109,10 @@ bin/auto-auto-complete.fish: src/completion bin/auto-auto-complete
 # Install rules
 
 .PHONY: install
-install: install-base install-examples install-info # install-shell
+install: install-base install-examples install-info install-shell
 
 .PHONY: install
-install-all: install-base install-doc # install-shell
+install-all: install-base install-doc install-shell
 
 # Install base rules
 
