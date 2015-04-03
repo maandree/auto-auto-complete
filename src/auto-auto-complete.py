@@ -3,7 +3,7 @@
 '''
 auto-auto-complete – Autogenerate shell auto-completion scripts
 
-Copyright © 2012, 2013  Mattias Andrée (maandree@member.fsf.org)
+Copyright © 2012, 2013, 2014, 2015  Mattias Andrée (maandree@member.fsf.org)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -638,7 +638,7 @@ class GeneratorZSH:
         
         @return  :str  The generated code
         '''
-        buf = '# zsh completion for %s         -*- shell-script -*-\n\n' % self.program
+        buf = '#compdef %s\n\n' % self.program
         
         files = self.__getFiles()
         
