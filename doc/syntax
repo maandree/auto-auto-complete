@@ -56,9 +56,27 @@ verbatim ::= 'verbatim' _value [{_ value}]
 
 calc ::= 'calc' (__ value | _ any_exec) [{_ value | _ any_exec}]
 
-any_exec ::= '(' _ exec_type (__ value | _ any_exec) [{_ value | _ any_exec}] _ ')'
+any_exec ::= '(' _ (exec_sequence | exec_redirect) _ ')'
+
+exec_sequence ::= exec_type (__ value | _ any_exec) [{_ value | _ any_exec}]
 
 exec_type ::= "exec" | "calc" | "pipe" | "fullpipe" | "cat" | "and" | "or"
+
+exec_redirect ::= std_redirect | fd_redirect | std_redirect_fd | fd_redirect_fd
+
+std_redirect ::= input _ any_exec _ value
+
+fd_redirect ::= "fd" _ any_exec _ (number _value | fdnum _ value)
+
+std_redirect_fd ::= input "-fd" _ any_exec _ (number | fdnum)
+
+fd_redirect_fd ::= "fd" _ any_exec _ (number __ number | (number | fdnum) _ fdnum | fdnum _ number)
+
+input ::= "stdin" | "stdout" | "stderr"
+
+fdnum :: = "(" _ input _ ")"
+
+number ::= {"0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"}
 
 name ::= {letter | escape | squote | dquote}
 

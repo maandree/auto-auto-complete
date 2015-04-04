@@ -54,11 +54,12 @@
 		    	    (no-exec ls "'/usr/share/ponysay/balloons'" (case (ponysay .say) (ponythink .think)))
 	)
 	(suggestion wrap    (verbatim none inherit 100 60)
-		    	    (calc (pipe (stty size)
+		    	    (calc (pipe (stdin-fd (stty size) (stderr))
 			    	  	(cut -d ' ' -f 2)
 				  ) - 10
 			    )
 	)
-	; in addition to `pipe`(|) to following are also possible `fullpipe`(|&) `cat`(;) `and`(&&) `or`(||)
+	; in addition to `pipe`(|) the following are also possible: `fullpipe`(|&) `cat`(;) `and`(&&) `or`(||)
+	; in addition to `stdin-fd`(<&) the following are also possible: `stdout-fd` `stderr-fd` `fd-fd` `stdin` `stdout` `stderr` `fd`
 )
 

@@ -17,7 +17,7 @@
 
 
 @copying
-Copyright @copyright{} 2014 Mattias Andrée
+Copyright @copyright{} 2014, 2015 Mattias Andrée
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -595,13 +595,13 @@ is to give it some default suggestion.
 The next step is to suggest the terminal's
 width minus 10 columns. In the Bash shell this
 can be calculated with
-@command{$(( $(stty size | cut -d ' ' -f 2) - 10 ))}.
+@command{$(( $(stty size <&2 | cut -d ' ' -f 2) - 10 ))}.
 
 @example
 ( ;We have cut out everything but (suggestion wrap).
   (suggestion wrap
      (verbatim none inherit 100 60)
-     (calc (pipe (stty size) (cut -d ' ' -f 2)) - 10)
+     (calc (pipe (stdin-fd (stty size) (stderr)) (cut -d ' ' -f 2)) - 10)
   )
 )
 @end example
@@ -620,6 +620,25 @@ can be used.
 @code{(a && b && c)}
 @item (or (a) (b) (c))
 @code{(a || b || c)}
+@end table
+
+It was also shown that @code{(stdin-fd (a) (stderr))} translates
+into @code{a <&2}. @code{(stdin)}, @code{(stdout)} and @code{(stderr)}
+translates into @code{0}, @code{1} and @code{2}, respectively.
+Additional @code{(stdin-fd a b)} translates into @code{a <&b},
+@code{(stdout-fd a b)} into @code{a >&b}, @code{(stderr-fd a b)} into @code{a 2>&b}
+and @code{(fd-fd a b c)} into @code{a b<>&c}.
+You can also redirect to files:
+
+@table @code
+@item (stdin a b)
+@code{a < b}
+@item (stdout a b)
+@code{a > b}
+@item (stderr a b)
+@code{a 2> b}
+@item (fd a b c)
+@code{a b> c}
 @end table
 
 
