@@ -718,7 +718,9 @@ class GeneratorZSH:
                     continue
                 buf += '    \'(%s)\'{%s}' % (' '.join(options), ','.join(options))
                 if 'desc' in item:
-                    buf += '"["%s"]"' % verb(' '.join(item['desc']))
+                    desc = ' '.join(item['desc'])
+                    desc = desc.replace('\\', '\\\\').replace('[', '\\[').replace(']', '\\]')
+                    buf += '"["%s"]"' % verb(desc)
                 if 'arg' in item:
                     buf += '":%s"' % verb(' '.join(item['arg']))
                 elif options[0] in suggesters:
