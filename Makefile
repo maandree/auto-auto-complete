@@ -55,30 +55,30 @@ doc: info pdf dvi ps
 
 .PHONY: info
 info: bin/auto-auto-complete.info
-bin/%.info: info/%.texinfo info/fdl.texinfo
+bin/%.info: doc/info/%.texinfo doc/info/fdl.texinfo
 	@mkdir -p bin
 	makeinfo $<
 	mv $*.info $@
 
 .PHONY: pdf
 pdf: bin/auto-auto-complete.pdf
-bin/%.pdf: info/%.texinfo info/fdl.texinfo
+bin/%.pdf: doc/info/%.texinfo doc/info/fdl.texinfo
 	@mkdir -p obj/pdf bin
-	cd obj/pdf ; yes X | texi2pdf ../../$<
+	cd obj/pdf && texi2pdf ../../$< < /dev/null
 	mv obj/pdf/$*.pdf $@
 
 .PHONY: dvi
 dvi: bin/auto-auto-complete.dvi
-bin/%.dvi: info/%.texinfo info/fdl.texinfo
+bin/%.dvi: doc/info/%.texinfo doc/info/fdl.texinfo
 	@mkdir -p obj/dvi bin
-	cd obj/dvi ; yes X | $(TEXI2DVI) ../../$<
+	cd obj/dvi && $(TEXI2DVI) ../../$< < /dev/null
 	mv obj/dvi/$*.dvi $@
 
 .PHONY: ps
 ps: bin/auto-auto-complete.ps
-bin/%.ps: info/%.texinfo info/fdl.texinfo
+bin/%.ps: doc/info/%.texinfo doc/info/fdl.texinfo
 	@mkdir -p obj/ps bin
-	cd obj/ps ; yes X | texi2pdf --ps ../../$<
+	cd obj/ps && texi2pdf --ps ../../$< < /dev/null
 	mv obj/ps/$*.ps $@
 
 
