@@ -1,0 +1,59 @@
+.TH AUTO-AUTO-COMPLETE 1 AUTO-AUTO-COMPLETE
+.SH NAME
+auto-auto-complete - Autogenerate shell auto-completion scripts
+.SH SYNOPSIS
+.B auto-auto-complete
+.I SHELL
+.B \-\-output
+.I OUTPUT
+.B \-\-source
+.I SOURCE
+.RI [ VARIABLE \fB=\fP VALUE ]...
+.br
+.B auto-auto-complete
+.I SHELL
+.B \-\-where
+.I COMMAND
+.SH DESCRIPTION
+.B auto-auto-complete
+generates a shell auto-completion script for the shell
+.IR SHELL ,
+from the file
+.IR SOURCE ,
+and stores it to
+.IR OUTPUT .
+Or, if
+.B \-\-where
+is used, print to stdout where such generate file should
+be installed for the command
+.IR COMMAND ,
+and the shell
+.IR SHELL .
+.PP
+When generating a file, a series of variables can defined
+using the argument pattern \(aq'\fIVARIABLE\fP\fB=\fP\fIVALUE\fP\(aq.
+.SH RATIONALE
+Noone really wants to write shell auto-completion scripts,
+especially not for more than one shell. But of course we
+want to have it.
+.SH "SEE ALSO"
+.BR bash-completion ,
+.BR bash (1),
+.BR fish (1),
+.BR zsh (1)
+.PP
+Full documentation available locally via: info \(aq(auto-auto-complete)\(aq
+.SH AUTHORS
+Principal author, Mattias Andrée.  See the COPYING file for the full
+list of authors.
+.SH LICENSE
+Copyright \(co 2013, 2015  Mattias Andrée
+.br
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+.br
+There is NO WARRANTY, to the extent permitted by law.
+.SH BUGS
+Please report bugs to https://github.com/maandree/auto-auto-complete/issues or to
+maandree@member.fsf.org

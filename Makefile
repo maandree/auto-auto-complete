@@ -17,6 +17,10 @@ DATADIR = $(PREFIX)$(DATA)
 DOCDIR = $(DATADIR)/doc
 # The info manual documentation path including prefix
 INFODIR = $(DATADIR)/info
+# The man page documentation path including prefix
+MANDIR = $(DATADIR)/man
+# The man page section 1 path including prefix
+MAN1DIR = $(MANDIR)/man1
 # The license base path including prefix
 LICENSEDIR = $(DATADIR)/licenses
 
@@ -109,7 +113,7 @@ bin/auto-auto-complete.fish: src/completion bin/auto-auto-complete
 # Install rules
 
 .PHONY: install
-install: install-base install-examples install-info install-shell
+install: install-base install-examples install-info install-man install-shell
 
 .PHONY: install
 install-all: install-base install-doc install-shell
@@ -132,7 +136,7 @@ install-license:
 # Install documentation
 
 .PHONY: install-doc
-install-doc: install-examples install-info install-pdf install-ps install-dvi
+install-doc: install-examples install-info install-pdf install-ps install-dvi install-man
 
 .PHONY: install-examples
 install-examples: doc/example
@@ -158,6 +162,11 @@ install-ps: bin/auto-auto-complete.ps
 install-dvi: bin/auto-auto-complete.dvi
 	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
 	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/$(PKGNAME).dvi"
+
+.PHONY: install-man
+install-man: doc/man/auto-auto-complete.1
+	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
+	install -m644 $< -- "$(DESTDIR)$(MAN1DIR)/$(COMMAND).1"
 
 # Install shell auto-completion
 
@@ -192,6 +201,7 @@ uninstall:
 	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/$(PKGNAME).ps"
 	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/$(PKGNAME).dvi"
 	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)/example"
+	-rm -- "$(DESTDIR)$(MAN1DIR)/$(COMMAND).1"
 	-rmdir -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME)"
 	-rm -- "$(DESTDIR)$(DATADIR)/fish/completions/$(COMMAND).fish"
 	-rmdir -- "$(DESTDIR)$(DATADIR)/fish/completions"

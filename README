@@ -8,11 +8,17 @@ SYNOPSIS
 DESCRIPTION
 	auto-auto-complete generates a shell auto-completion script for
 	the shell SHELL, from the file SOURCE, and stores it to OUTPUT.
-	Or, if --where is used, print to stdout, where such generate
-	file should be stored for the command COMMAND, and the shell SHELL.
+	Or, if --where is used, print to stdout where such generate
+	file installed be stored for the command COMMAND, and the shell
+	SHELL.
 
 	When generating a file, a series of variables can defined using
 	the argument pattern 'VARIABLE=VALUE'.
+
+RATIONALE
+	Noone really wants to write shell auto-completion scripts,
+	especially not for more than one shell. But of course we
+	want to have it.
 
 SEE ALSO
 	bash-completion, bash(1), fish(1), zsh(1)
