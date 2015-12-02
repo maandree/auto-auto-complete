@@ -36,7 +36,7 @@ arg ::= '(' _ "arg" _value ')'
 suggest ::= '(' _ "suggest" _value ')'
 
 files ::= '(' _ "files" _value [{_ value}] ')'
-::=  {"-0" | "-a" | "-d" | "-D" | "-f" | "-l" | "-r"} [{value}]
+::=  {"-0" | "-a" | "-d" | "-D" | "-f" | "-l" | "-r" | "-b" | "-c" | "-s" | "-S" | "-p"} [{value}]
 
 bind ::= '(' _ "bind" _value ')'
 

@@ -19,7 +19,9 @@
 	)
 	
 	; in files, -0 mean to not accept files, you can use to before other arguments to disallow them,
-	;           -a means accept all files, -d → directory, -s → socket, -D → door, -f → regular or pipe, -l → symlink (allowed by default on all), -r → regular
+	;           -a means accept all files, -d → directory, -s → socket, -D → door, -f → regular or pipe,
+	;           -l → symlink (allowed by default on all), -r → regular, -b → block device,
+	;           -c → character device, -S → block device or character device, -p → pipe
 	(multiple argumented
 		((options -f --file --pony)       (complete --file --pony) (arg PONY)    (suggest pony-f)  (files -f *.pony)  (desc 'Specify the pony that should printed'))
 		((options +f ++file ++pony)       (complete ++file ++pony) (arg PONY)    (suggest pony+f)  (files -f *.pony)  (desc 'Specify the extrapony that should printed'))
