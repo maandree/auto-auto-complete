@@ -33,5 +33,5 @@ RATIONALE
 SEE ALSO
 	bash-completion, bash(1), fish(1), zsh(1)
 
-	Full documentation available locally via: info '(auto-auto-complete)
+	Full documentation available locally via: info '(auto-auto-complete)'
 
