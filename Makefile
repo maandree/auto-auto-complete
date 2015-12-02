@@ -35,10 +35,13 @@ PKGNAME = auto-auto-complete
 # Build rules
 
 .PHONY: default
-default: command info shell
+default: base info shell
 
 .PHONY: all
-all: command doc shell
+all: base doc shell
+
+.PHONY: base
+base: command
 
 
 # Build rules for the command
@@ -165,7 +168,7 @@ install-dvi: bin/auto-auto-complete.dvi
 
 .PHONY: install-man
 install-man: doc/man/auto-auto-complete.1
-	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
+	install -dm755 -- "$(DESTDIR)$(MAN1DIR)"
 	install -m644 $< -- "$(DESTDIR)$(MAN1DIR)/$(COMMAND).1"
 
 # Install shell auto-completion
