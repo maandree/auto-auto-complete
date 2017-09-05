@@ -118,7 +118,7 @@ bin/auto-auto-complete.fish: src/completion bin/auto-auto-complete
 .PHONY: install
 install: install-base install-examples install-info install-man install-shell
 
-.PHONY: install
+.PHONY: install-all
 install-all: install-base install-doc install-shell
 
 # Install base rules
