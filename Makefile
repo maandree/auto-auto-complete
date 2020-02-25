@@ -188,8 +188,8 @@ install-zsh: bin/auto-auto-complete.zsh
 
 .PHONY: install-fish
 install-fish: bin/auto-auto-complete.fish
-	install -dm755 -- "$(DESTDIR)$(DATADIR)/fish/completions"
-	install -m644 $< -- "$(DESTDIR)$(DATADIR)/fish/completions/$(COMMAND).fish"
+	install -dm755 -- "$(DESTDIR)$(DATADIR)/fish/vendor_completions.d"
+	install -m644 $< -- "$(DESTDIR)$(DATADIR)/fish/vendor_completions.d/$(COMMAND).fish"
 
 
 # Uninstall rules
