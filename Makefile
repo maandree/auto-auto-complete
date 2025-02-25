@@ -56,10 +56,3 @@ clean:
 	-rm -f -- auto-auto-complete.bash auto-auto-complete.zsh auto-auto-complete.fish
 
 .PHONY: all install uninstall clean
-
-
-pdf: bin/auto-auto-complete.pdf
-bin/%.pdf: doc/info/%.texinfo doc/info/fdl.texinfo
-	@mkdir -p obj/pdf bin
-	cd obj/pdf && texi2pdf ../../$< < /dev/null
-	mv obj/pdf/$*.pdf $@
