@@ -2,28 +2,45 @@ NAME
 	auto-auto-complete - Autogenerate shell auto-completion scripts
 
 SYNOPSIS
-	auto-auto-complete SHELL -o OUTPUT -s SOURCE [VARIABLE=VALUE]...
-	auto-auto-complete SHELL -w COMMAND
+	auto-auto-complete shell (-w command | -o output -s source [variable=value] ...)
 
 DESCRIPTION
-	auto-auto-complete generates a shell auto-completion script for
-	the shell SHELL, from the file SOURCE, and stores it to OUTPUT.
-	Or, if -w is used, print to stdout where such generate file
-	installed be stored for the command COMMAND, and the shell SHELL.
+	auto-auto-complete generates a shell auto-completion script.
 
-	When generating a file, a series of variables can defined using
-	the argument pattern 'VARIABLE=VALUE'.
+	auto-auto-complete provides a LISP-like declarative language for
+	creating auto-completion scripts for commands in a shell-agnostic way.
+	However, auto-auto-complete's language is limited in comparsion to
+	for example raw auto-completion scripts for the bash shell, however
+	it is well enough for most projects.
 
 OPTIONS
-	-o, --output OUTPUT
+	-o, --output output
 		The name of the file to generate.
 
-	-s, -f, --source, --file SOURCE
+	-s, -f, --source, --file source
 		The name of the file to parse.
 
-	-w, --where COMMAND
-		Print where the script shall be installed if
-		the name of the command is COMMAND.
+	-w, --where command
+		Print where, sans the path prefix, the script shall be
+		installed if the name of the command is command.
+
+		For example, for the command "cmd", auto-auto-complete bash
+		-w cmd would print "/share/bash-completion/completions/cmd",
+		meaning that the script shall be installed to
+		"/usr/share/bash-completion/completions/cmd" or
+		"/usr/local/share/bash-completion/completions/cmd" depending
+		on the path prefix used for the package.
+
+OPERANDS
+	shell
+		The shell the auto-completion script shall be generated
+		for. Currently supported shells are: bash, fish, and zsh.
+
+	variable=value
+		Define a variable to have a specific value.
+
+		Defining a variable multiple times creates an array
+		of values for that variable.
 
 RATIONALE
 	Noone really wants to write shell auto-completion scripts,
@@ -32,6 +49,3 @@ RATIONALE
 
 SEE ALSO
 	bash-completion, bash(1), fish(1), zsh(1)
-
-	Full documentation available locally via: info '(auto-auto-complete)'
-

@@ -64,4 +64,3 @@
 	; in addition to `pipe`(|) the following are also possible: `fullpipe`(|&) `cat`(;) `and`(&&) `or`(||)
 	; in addition to `stdin-fd`(<&) the following are also possible: `stdout-fd` `stderr-fd` `fd-fd` `stdin` `stdout` `stderr` `fd`
 )
-

@@ -22,4 +22,3 @@
 	
 	(suggestion default (verbatim bash zsh fish VARIABLE=VALUE))
 )
-

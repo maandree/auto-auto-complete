@@ -1,30 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-'''
-auto-auto-complete – Autogenerate shell auto-completion scripts
-
-Copyright © 2012, 2013, 2014, 2015  Mattias Andrée (m@maandree.se)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# See LICENSE file for copyright and license details.
 import sys
 
 
 def print(text = '', end = '\n'):
     '''
-    Hack to enforce UTF-8 in output (in the future, if you see anypony not using utf-8 in
-    programs by default, report them to Princess Celestia so she can banish them to the moon)
+    Hack to enforce UTF-8 in output
     
     @param  text:str  The text to print (empty string is default)
     @param  end:str   The appendix to the text to print (line breaking is default)
@@ -832,7 +814,7 @@ class GeneratorZSH:
 
 def main(shell, output, source):
     '''
-    mane!
+    main!
     
     @param  shell:str   Shell for which to generate completion
     @param  output:str  Output file
@@ -897,7 +879,7 @@ def main(shell, output, source):
 
 def where_main(shell, command):
     '''
-    --where mane!
+    --where main!
     
     @param  shell:str    Shell for which the completion should be installed
     @param  command:str  The commmad name
@@ -910,11 +892,11 @@ def where_main(shell, command):
 
 
 
-# supermane!
+# supermain!
 if __name__ == '__main__':
     if (len(sys.argv) == 1) or ((len(sys.argv) == 2) and (sys.argv[1] in ('-h', '--help'))):
-        print("USAGE: auto-auto-complete SHELL --output OUTPUT_FILE --source SOURCE_FILE [VARIABLE=VALUE...]")
-        print("   or: auto-auto-complete SHELL --where COMMAND")
+        print("USAGE: auto-auto-complete shell --output output-file --source source-file [variable=value] ...")
+        print("   or: auto-auto-complete shell --where command")
         exit(2)
     
     shell = None
@@ -969,4 +951,3 @@ if __name__ == '__main__':
         main(shell= shell, output= output, source= source)
     else:
         where_main(shell= shell, command= where)
-

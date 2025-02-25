@@ -1,0 +1,771 @@
+.TH AUTO-AUTO-COMPLETE 1 AUTO-AUTO-COMPLETE
+.SH NAME
+auto-auto-complete - Autogenerate shell auto-completion scripts
+
+.SH SYNOPSIS
+.B auto-auto-complete
+.I shell
+.RB ( \-w
+.I command
+|
+.B \-o
+.I output
+.B \-s
+.I source
+.RI [ variable \fB=\fP value "] ...)"
+
+.SH DESCRIPTION
+.B auto-auto-complete
+generates a shell auto-completion script.
+.PP
+.B auto-auto-complete
+provides a LISP-like declarative language for creating auto-completion
+scripts for commands in a shell-agnostic way. However,
+.BR auto-auto-complete 's
+language is limited in comparsion to for example raw auto-completion
+scripts for the bash shell, however it is well enough for most projects.
+.SH OPTIONS
+.BR \-o ,\  \-\-output \ \fIoutput\fP
+The name of the file to generate.
+.TP
+.BR \-s ,\  \-f ,\  \-\-source ,\  \-\-file \ \fIsource\fP
+The name of the file to parse.
+.TP
+.BR \-w ,\  \-\-where \ \fIcommand\fP
+Print where, sans the path prefix, the script shall be installed if
+the name of the command is
+.IR command .
+
+For example, for the command
+.RB \(dq cmd \(dq,
+.I auto-auto-complete bash -w cmd
+would print
+.RB \(dq /share/bash-completion/completions/cmd \(dq,
+meaning that the script shall be installed to
+.RB \(dq /usr/share/bash-completion/completions/cmd \(dq
+or
+.RB \(dq /usr/local/share/bash-completion/completions/cmd \(dq
+depending on the path prefix used for the package.
+
+.SH OPERANDS
+.TP
+.I shell
+The shell the auto-completion script shall be generated for.
+Currently supported
+.IR shell s
+are:
+.BR bash ,
+.BR fish ,
+and
+.BR zsh .
+.TP
+.IB variable = value
+Define a variable to have a specific value.
+
+Defining a variable multiple times creates an array
+of values for that variable.
+
+.SH EXTENDED DESCRIPTION
+.B auto-auto-complete
+uses a LISP-like free form syntax.
+syntax. Valid whitespace is normal blank space,
+horizontal tab space, carriage return, line feed (new line)
+and form feed (new page). Comments can be started with either
+a semicolon
+.RB ( ; )
+or a hash
+.RB ( # ).
+Comments end at the next following new line, which may either
+be a carriage return, line feed or form feed. Comments cannot
+be started inside quotes.
+.PP
+The backslash character
+.RB ( \e )
+can be used to force the following character to be parsed
+verbatim, this is called escaping. It is highly discourage to
+use this to escape new lines, especially if the new line
+encoding used in the document is carrige return–line feed, as
+that would only escape the carrige return. There is also a set
+of characters that have a special meaning when they are escaped:
+.TP
+.B a
+Audible bell character.
+.TP
+.B b
+Backspace character.
+.TP
+.B e
+Escape character.
+.TP
+.B f
+Form feed character.
+.TP
+.B n
+Line feed character.
+.TP
+.B r
+Carriage character.
+.TP
+.B t
+Horizontal tab space character.
+.TP
+.B v
+Vertical tab space character.
+.TP
+.B 0
+Null character.
+.PP
+Quotes, either simple quotes
+.RB ( \(aq )
+or double quotes
+.RB ( \(dq )
+can be used to parse all character verbatim except backslash
+.RB ( \e ).
+A quote ends at the next quote character that is not escaped
+by a backslash
+.RB ( \e )
+and is identical to the opening quote character. This is
+especially useful for escaping whitespace and round brackets.
+.PP
+The rest of this chapter will demonstrate how to write a script
+by example of
+.BR ponysay (6)
+(because it uses most of the syntax).
+.PP
+The first thing we do is to declare which command the script
+is for. We do this by creating the root brackets and put the
+name of the command as the first element.
+.PP
+.RS
+.nf
+(ponysay)
+.fi
+.RE
+.PP
+However,
+.BR ponysay (6)
+has a very similar command called
+.BR ponythink (6).
+It is sensible to let the same script be used for auto-complete
+for both commands, to do this we utilise that we can define
+variables when we invoke
+.BR auto-auto-complete .
+.PP
+.RS
+.nf
+((value command))
+.fi
+.RE
+.PP
+Now when we compile this script we need invoke
+.B auto-auto-complete
+with either
+.B command=ponysay
+or
+.BR command=ponythink .
+If we want
+.BR ponysay (6)
+to be used if we do not specify a value for command we instead
+write:
+.PP
+.RS
+.nf
+((value command ponysay))
+.fi
+.RE
+.PP
+Remember that we could give a variable multiple values. This can
+also be done here. However in this example we only want one value.
+For example,
+.I ((value var a b))
+would generate
+.I (a b)
+if var has not been set.
+.PP
+.BR ponysay (6)
+recognises the options
+.B -h
+and
+.B --help
+for printing a summary of recognised options. These options does not
+take any arguments and hence are specified with
+.IR (unargumented) .
+.PP
+.RS
+.nf
+((value command ponysay)
+  (unargumented (options -h --help)
+                (desc \(aqShow summary of options\(aq))
+)
+.fi
+.RE
+.PP
+This only specifies that these option exists, if we also want the
+generated scripts to suggest
+.B --help
+we need to add
+.IR "(complete --help)" .
+.PP
+.RS
+.nf
+((value command ponysay)
+  (unargumented (options -h --help)
+                (complete --help)
+                (desc \(aqShow summary of options\(aq))
+)
+.fi
+.RE
+.PP
+Now that we have our first option, let's add a few others, to keep the
+example short, we will skip the most of the options.
+.PP
+.RS
+.nf
+((value command ponysay)
+  (unargumented (options -h --help)
+                (complete --help)
+  (desc \(aqShow summary of options\(aq))
+                (unargumented (options -l --list)
+                (complete --list)
+                (desc \(aqList all MLP:FiM ponies\(aq))
+  (unargumented (options +l ++list)
+                (complete ++list)
+                (desc \(aqList all non-MLP:FiM ponies\(aq))
+  (unargumented (options -X --256-colours --256colours --x-colours)
+                (desc \(aqUse xterm colours\(aq))
+)
+.fi
+.RE
+.PP
+Now (especially if we had added all options) we have many
+.I (unargumented)
+blocks. We can use
+.I (multiple)
+so we do not have to write
+.B unargumented
+so many times.
+.PP
+.RS
+.nf
+((value command ponysay)
+  (multiple unargumented
+    ((options -h --help) (complete --help)
+     (desc \(aqShow summary of options\(aq))
+    ((options -l --list) (complete --list)
+     (desc \(aqList all MLP:FiM ponies\(aq))
+    ((options +l ++list) (complete ++list)
+     (desc \(aqList all non-MLP:FiM ponies\(aq))
+    ((options -X --256-colours --256colours --x-colours)
+     (desc \(aqUse xterm colours\(aq))
+  )
+)
+.fi
+.RE
+.PP
+To keep this example short we will truncate this to:
+.PP
+.RS
+.nf
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+)
+.fi
+.RE
+.PP
+.BR ponysay (6)
+also have a number of options that does take an argument.
+We will add a few of them.
+.PP
+.RS
+.nf
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony)
+     (desc \(aqSpecify the pony that should printed\(aq))
+    ((options -b --bubble --balloon) (complete --balloon)
+     (desc \(aqSpecify message balloon style\(aq))
+    ((options -W --wrap) (complete --wrap)
+     (desc \(aqSpecify wrapping column\(aq))
+    ((options +c --colour) (complete --colour)
+     (desc \(aqSpecify colour of the balloon, balloon link and message\(aq))
+  )
+)
+.fi
+.RE
+.PP
+Just like
+.B ponysay --help
+prints
+.B --wrap COLUMN
+to indicate that the argument for
+.B --wrap
+is an index of the column where the message printed by
+.BR ponysay (6)
+is wrapped, shells could display the text
+.B COLUMN
+as a placeholder for the next argument when you have typed
+.BR --wrap .
+To enable this in shells that support it, we use
+.IR (arg) .
+.PP
+.RS
+.nf
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony) (arg PONY)
+     (desc \(aqSpecify the pony that should printed\(aq))
+    ((options -b --bubble --balloon) (complete --balloon) (arg STYLE)
+     (desc \(aqSpecify message balloon style\(aq))
+    ((options -W --wrap) (complete --wrap) (arg COLUMN)
+     (desc \(aqSpecify wrapping column)\(aq)
+    ((options +c --colour) (complete --colour) (arg ANSI-COLOUR)
+     (desc \(aqSpecify colour of the balloon, balloon link and message\(aq))
+  )
+)
+.fi
+.RE
+.PP
+The next step now is to specify the type of argument the
+options want. To do this we use
+.IR (files) .
+The elements in
+.I (files)
+specify what type of file the shell should suggest. Multiple
+type can be used. The recognised ones are:
+.TP
+.B -0
+Do not suggest files, or do not suggest files of types specified after
+.BR -0 .
+.TP
+.B -a
+Suggest all files.
+.TP
+.B -f
+Suggest regular files and pipes.
+.TP
+.B -r
+Suggest regular files but not pipes.
+.TP
+.B -p
+Suggest pipes but not regular files.
+.TP
+.B -d
+Suggest directories.
+.TP
+.B -l
+Suggest symlinks. This is suggest by default, but
+.B -0
+can be used to stop this.
+.TP
+.B -s
+Suggest sockets.
+.TP
+.B -D
+Suggest doors.
+.TP
+.B -b
+Suggest block devices.
+.TP
+.B -c
+Suggest character devices.
+.TP
+.B -S
+Suggest block devices and character devices.
+.PP
+.RS
+.nf
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony) (arg PONY)
+     (files -f)
+     (desc \(aqSpecify the pony that should printed\(aq))
+    ((options -b --bubble --balloon) (complete --balloon) (arg STYLE)
+     (files -f)
+     (desc \(aqSpecify message balloon style\(aq))
+    ((options -W --wrap) (complete --wrap) (arg COLUMN)
+     (files -0)
+     (desc Specify wrapping column))
+    ((options +c --colour) (complete --colour) (arg ANSI-COLOUR)
+     (files -0)
+     (desc \(aqSpecify colour of the balloon, balloon link and message\(aq))
+  )
+)
+.fi
+.RE
+.PP
+.I (files)
+can also be used to specify patterns (using
+.BR sh (1)-globbing)
+for the filenames of the files to suggest. For example
+.B --pony
+in
+.BR ponysay (6)
+should only, in respect to files, suggest files that end with
+.BR .pony .
+.PP
+.RS
+.nf
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony) (arg PONY)
+     (files -f *.pony)
+     (desc \(aqSpecify the pony that should printed\(aq))
+    ((options -b --bubble --balloon) (complete --balloon) (arg STYLE)
+     (files -f *.say)
+     (desc \(aqSpecify message balloon style\(aq))
+    ((options -W --wrap) (complete --wrap) (arg COLUMN)
+     (files -0)
+     (desc Specify wrapping column))
+    ((options +c --colour) (complete --colour) (arg ANSI-COLOUR)
+     (files -0)
+     (desc \(aqSpecify colour of the balloon, balloon link and message\(aq))
+  )
+)
+.fi
+.RE
+.PP
+For
+.B --balloon
+files ending with
+.B .say
+should be suggested if the completion is for
+.BR ponysay (6),
+but for
+.BR ponythink (6)
+.BR .think -files
+should be suggested. We can use
+.I (case)
+to select this based on the value of the first element in the root
+block, which is the name of the command.
+.PP
+.RS
+.nf
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony) (arg PONY)
+     (files -f *.pony)
+     (desc \(aqSpecify the pony that should printed\(aq))
+    ((options -b --bubble --balloon) (complete --balloon) (arg STYLE)
+     (files -f (case (ponysay *.say) (ponythink *.think)))
+     (desc \(aqSpecify message balloon style\(aq))
+    ((options -W --wrap) (complete --wrap) (arg COLUMN)
+     (files -0)
+     (desc Specify wrapping column))
+    ((options +c --colour) (complete --colour) (arg ANSI-COLOUR)
+     (files -0)
+     (desc \(aqSpecify colour of the balloon, balloon link and message\(aq))
+  )
+)
+.fi
+.RE
+.PP
+Another part of options with arguments is suggestions that
+are not based on filenames.
+.PP
+.RS
+.nf
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented
+    ((options -f --file --pony) (complete --file --pony) (arg PONY)
+     (suggest pony-f) (files -f *.pony)
+     (desc \(aqSpecify the pony that should printed\(aq))
+    ((options -b --bubble --balloon) (complete --balloon) (arg STYLE)
+     (suggest balloon)
+     (files -f (case (ponysay *.say) (ponythink *.think)))
+     (desc \(aqSpecify message balloon style\(aq))
+    ((options -W --wrap) (complete --wrap) (arg COLUMN)
+     (suggest wrap) (files -0)
+     (desc Specify wrapping column))
+    ((options +c --colour) (complete --colour) (arg ANSI-COLOUR)
+     (files -0)
+     (desc \(aqSpecify colour of the balloon, balloon link and message\(aq))
+  )
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+.fi
+.RE
+.PP
+Let's cut out the options again to make this shorter.
+.PP
+.RS
+.nf
+((value command ponysay)
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented ...)   ;We have cut out the options.
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+.fi
+.RE
+.PP
+Another part of
+.BR ponysay (6)
+is that it will take also arguments that are not associated with
+any option, operands, which make up the message it prints out.
+.PP
+.RS
+.nf
+((value command ponysay)
+  (default (arg MESSAGE) (files -0) (suggest message)
+  (desc \(aqMessage spoken by the pony\(aq))
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented ...)   ;We have cut out the options.
+  (suggestion message) ;We will fill this in later...
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+.fi
+.RE
+.PP
+A rather unusual part of
+.BR ponysay (6)
+is that it has variadic options. A variadic option is a option
+that takes all following arguments, unconditionally. For example, in
+.BR ponysay (6)
+you can write
+.B --ponies twilight trixie
+instead of
+.BR "--pony twilight --pony trixie" .
+.I (variadic)
+is used to declare a variadic option.
+.I (bind)
+becomes interesting here; because
+.BR ponysay (6)'s
+variadic options have non-variadic counterparts, it is pleasant
+to reuse the non-variadic options' configurations.
+.I (bind)
+will copy everything that is missing except
+.I (options)
+and
+.IR (complete) .
+In this example we will not use
+.I (complete)
+because we do not want variadic options to be suggest but we will use
+.I (desc)
+because we want to adjust the descriptions.
+.PP
+.RS
+.nf
+((value command ponysay)
+  (default (arg MESSAGE) (files -0) (suggest message)
+   (desc \(aqMessage spoken by the pony\(aq))
+  (multiple unargumented ...) ;We have cut out the options.
+  (multiple argumented ...)   ;We have cut out the options.
+  (variadic (options --f --files --ponies) (bind -f)
+            (desc \(aqSpecify the ponies that may be printed\(aq))
+  (suggestion message) ;We will fill this in later...
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+.fi
+.RE
+.PP
+Notice that we used
+.B -f
+for the element in
+.IR (bind) ,
+this is because we want
+.BR --f ,
+.B --files
+and
+.B --ponies
+to have the same configurations (with exception for the
+description) as the
+.B -f
+option.
+.PP
+Once again, to make the example shorter we will cut out
+some parts.
+.PP
+.RS
+.nf
+( ;We have cut out everything but the (suggestion):s.
+  (suggestion message) ;We will fill this in later...
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+.fi
+.RE
+.PP
+For
+.I (suggestion message)
+we want the word
+.RB \(dq MESSAGE \(dq
+to be suggested to let the user know that the non-option
+arguments make up the message that is printed (if used).
+.PP
+.RS
+.nf
+( ;We have cut out everything but the (suggestion):s.
+  (suggestion message (verbatim MESSAGE))
+  (suggestion pony-f)  ;We will fill this in later...
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+.fi
+.RE
+.PP
+For
+.I (suggestion pony-f)
+we want, in addition to the
+.BR .pony -files
+which as already been configured,
+.BR .pony -files
+from
+.I /usr/share/ponysay/ponies
+to be suggested without the
+.IR .pony- suffix.
+.PP
+.RS
+.nf
+( ;We have cut out everything but the (suggestion):s.
+  (suggestion message (verbatim MESSAGE))
+  (suggestion pony-f (ls \(dq\(aq/usr/share/ponysay/ponies\(aq\(dq .pony))
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+.fi
+.RE
+.PP
+However, if the shell supports executing comments
+to get suggetions we want to utilise this.
+.PP
+.RS
+.nf
+( ;We have cut out everything but the (suggestion):s.
+  (suggestion message (verbatim MESSAGE))
+  (suggestion pony-f (exec \(dq\(aq/usr/bin/ponysay\(aq\(dq --onelist)
+  (noexec ls \(dq\(aq/usr/share/ponysay/ponies\(aq\(dq .pony))
+  (suggestion balloon) ;We will fill this in later...
+  (suggestion wrap)    ;We will fill this in later...
+)
+.fi
+.RE
+.PP
+.I (suggestion balloon)
+will work very similarly.
+.PP
+.RS
+.nf
+( ;We have cut out everything but the (suggestion):s.
+  (suggestion message (verbatim MESSAGE))
+  (suggestion pony-f (exec \(dq\(aq/usr/bin/ponysay\(aq\(dq --onelist)
+                     (noexec ls \(dq\(aq/usr/share/ponysay/ponies\(aq\(dq .pony))
+  (suggestion balloon (exec \(dq\(aq/usr/bin/ponysay\(aq\(dq --balloonlist)
+                      (no-exec ls \(dq\(aq/usr/share/ponysay/balloons\(aq\(dq
+  (case (ponysay .say) (ponythink .think))))
+        (suggestion wrap) ;We will fill this in later...
+)
+.fi
+.RE
+.PP
+The first thing we want to do for
+.B --wrap
+is to give it some default suggestion.
+.PP
+.RS
+.nf
+( ;We have cut out everything but (suggestion wrap).
+  (suggestion wrap (verbatim none inherit 100 60))
+)
+.fi
+.RE
+.PP
+The next step is to suggest the terminal’s width minus 10 columns.
+In the POSIX shell this can be calculated with
+.IR "$(( $(stty size <&2 | cut -d \(aq \(aq -f 2) - 10 ))" .
+.PP
+.RS
+.nf
+( ;We have cut out everything but (suggestion wrap).
+  (suggestion wrap
+    (verbatim none inherit 100 60)
+    (calc (pipe (stdin-fd (stty size) (stderr)) (cut -d \(aq \(aq -f 2)) - 10)
+  )
+)
+.fi
+.RE
+.PP
+As seen here
+.I (pipe (a) (b) (c))
+translates into
+.IR "(a | b | c)" .
+There are a few similar blocks that can be used.
+.TP
+.I (fullpipe (a) (b) (c))
+.BR "(a |& b |& c)" ,
+or equivalently:
+.B (a 2>&1 | b 2>&1 | c)
+.TP
+.I (cat (a) (b) (c))
+.B (a ; b ; c)
+.TP
+.I (and (a) (b) (c))
+.B (a && b && c)
+.TP
+.I (or (a) (b) (c))
+.B (a || b || c)
+.PP
+It was also shown that
+.I (stdin-fd (a) (stderr))
+translates into
+.BR "a <&2 " .
+.IR (stdin) ,
+.IR (stdout) ,
+and
+.I (stderr)
+translates into
+.BR 0 ,
+.BR 1 ,
+and
+.BR 2 ,
+respectively. Additional
+.I (stdin-fd a b)
+translates into
+.BR "a <&b" ,
+.I (stdout-fd a b)
+into
+.BR "a >&b" ,
+.I (stderr-fd a b)
+into
+.BR "a 2>&b" ,
+and
+.I (fd-fd a b c)
+into
+.BR "a b<>&c ".
+You can also redirect to files:
+.TP
+.I (stdin a b)
+.B a<b
+.TP
+.I (stdout a b)
+.B a>b
+.TP
+.I (stderr a b)
+.B a 2> b
+.TP
+.I (fd a b c)
+.B a b> c
+
+.SH RATIONALE
+Noone really wants to write shell auto-completion scripts,
+especially not for more than one shell. But of course we
+want to have it.
+
+.SH SEE ALSO
+.BR bash-completion ,
+.BR bash (1),
+.BR fish (1),
+.BR zsh (1)
