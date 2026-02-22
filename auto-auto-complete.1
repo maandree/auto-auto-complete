@@ -1,6 +1,6 @@
 .TH AUTO-AUTO-COMPLETE 1 AUTO-AUTO-COMPLETE
 .SH NAME
-auto-auto-complete - Autogenerate shell auto-completion scripts
+auto-auto-complete - Auto-generate shell auto-completion scripts
 
 .SH SYNOPSIS
 .B auto-auto-complete
@@ -22,7 +22,7 @@ generates a shell auto-completion script.
 provides a LISP-like declarative language for creating auto-completion
 scripts for commands in a shell-agnostic way. However,
 .BR auto-auto-complete 's
-language is limited in comparsion to for example raw auto-completion
+language is limited in comparison to for example raw auto-completion
 scripts for the bash shell, however it is well enough for most projects.
 .SH OPTIONS
 .BR \-o ,\  \-\-output \ \fIoutput\fP
@@ -82,10 +82,10 @@ be started inside quotes.
 The backslash character
 .RB ( \e )
 can be used to force the following character to be parsed
-verbatim, this is called escaping. It is highly discourage to
+verbatim, this is called escaping. It is highly discouraged to
 use this to escape new lines, especially if the new line
-encoding used in the document is carrige return–line feed, as
-that would only escape the carrige return. There is also a set
+encoding used in the document is carriage return–line feed, as
+that would only escape the carriage return. There is also a set
 of characters that have a special meaning when they are escaped:
 .TP
 .B a
@@ -640,7 +640,7 @@ to be suggested without the
 .RE
 .PP
 However, if the shell supports executing comments
-to get suggetions we want to utilise this.
+to get suggestions we want to utilise this.
 .PP
 .RS
 .nf
@@ -760,7 +760,7 @@ You can also redirect to files:
 .B a b> c
 
 .SH RATIONALE
-Noone really wants to write shell auto-completion scripts,
+No one really wants to write shell auto-completion scripts,
 especially not for more than one shell. But of course we
 want to have it.
 

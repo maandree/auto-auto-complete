@@ -1,5 +1,5 @@
 NAME
-	auto-auto-complete - Autogenerate shell auto-completion scripts
+	auto-auto-complete - Auto-generate shell auto-completion scripts
 
 SYNOPSIS
 	auto-auto-complete shell (-w command | -o output -s source [variable=value] ...)
@@ -9,7 +9,7 @@ DESCRIPTION
 
 	auto-auto-complete provides a LISP-like declarative language for
 	creating auto-completion scripts for commands in a shell-agnostic way.
-	However, auto-auto-complete's language is limited in comparsion to
+	However, auto-auto-complete's language is limited in comparison to
 	for example raw auto-completion scripts for the bash shell, however
 	it is well enough for most projects.
 
@@ -43,7 +43,7 @@ OPERANDS
 		of values for that variable.
 
 RATIONALE
-	Noone really wants to write shell auto-completion scripts,
+	No one really wants to write shell auto-completion scripts,
 	especially not for more than one shell. But of course we
 	want to have it.
 
